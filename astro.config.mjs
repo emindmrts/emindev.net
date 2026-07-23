@@ -9,7 +9,7 @@ import keystatic from "@keystatic/astro";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://astro-micro.vercel.app",
+  site: "https://www.emindev.net/",
   integrations: [sitemap(), mdx(), pagefind(), react(), keystatic()],
   adapter: vercel(),
   vite: {
