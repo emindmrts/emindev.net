@@ -343,6 +343,11 @@ const techStack = [
 
       let cx, cy;
 
+      let velocity = 0;
+      let targetRate = 1.0;
+      let currentRate = 1.0;
+      let loopId = null;
+
       function onPointerDown(e) {
         if (!audio.src) return;
         vinylState.isDragging = true;
@@ -357,6 +362,8 @@ const techStack = [
         
         vinylWrap.setPointerCapture(e.pointerId);
         e.preventDefault();
+        
+        if (loopId) cancelAnimationFrame(loopId);
       }
 
       function onPointerMove(e) {
@@ -375,31 +382,65 @@ const techStack = [
           vinylState.currentAngle += deltaAngle;
           vinyl.style.transform = `rotate(${vinylState.currentAngle}deg)`;
           
-          const velocity = deltaAngle / deltaTime;
+          velocity = deltaAngle / deltaTime;
           const speedMultiplier = Math.abs(velocity) * 4; 
-          let newRate = 1.0 + speedMultiplier;
+          targetRate = 1.0 + speedMultiplier;
           
-          if (newRate > 4.0) newRate = 4.0;
-          if (newRate < 0.25) newRate = 0.25;
+          if (targetRate > 4.0) targetRate = 4.0;
+          if (targetRate < 0.25) targetRate = 0.25;
           
+          currentRate = targetRate;
           if (!audio.paused) {
-             audio.playbackRate = newRate;
+             audio.playbackRate = currentRate;
           }
         }
         
         vinylState.lastAngle = currentAngle;
         vinylState.lastTime = currentTime;
       }
+      
+      function inertiaLoop() {
+        if (vinylState.isDragging) return;
+        
+        // Smoothly return playback rate to 1.0
+        currentRate += (1.0 - currentRate) * 0.03; // Friction
+        
+        if (audio && !audio.paused) {
+          audio.playbackRate = currentRate;
+        }
+
+        // Apply remaining velocity to visually spin the record smoothly
+        velocity *= 0.95; // Friction for visual spin
+        const baseSpin = 2; // Normal spin speed (deg per frame)
+        vinylState.currentAngle += baseSpin + (velocity * 16); 
+        vinyl.style.transform = `rotate(${vinylState.currentAngle}deg)`;
+
+        // Stop the loop when we're close enough to normal
+        if (Math.abs(currentRate - 1.0) < 0.01 && Math.abs(velocity) < 0.01) {
+          audio.playbackRate = 1.0;
+          vinyl.classList.remove("is-dragging");
+          vinyl.style.transform = ''; // give control back to CSS
+          loopId = null;
+          return;
+        }
+        
+        loopId = requestAnimationFrame(inertiaLoop);
+      }
 
       function onPointerUp(e) {
         if (!vinylState.isDragging) return;
         vinylState.isDragging = false;
-        vinyl.classList.remove("is-dragging");
         vinylWrap.releasePointerCapture(e.pointerId);
         
-        if (audio) audio.playbackRate = 1.0;
-        vinyl.style.transform = '';
+        // Start smooth deceleration
+        if (!loopId) loopId = requestAnimationFrame(inertiaLoop);
       }
+
+      // Prevent Spotify link from opening when clicking/dragging the vinyl
+      vinylWrap.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, opts);
 
       vinylWrap.addEventListener("pointerdown", onPointerDown, opts);
       vinylWrap.addEventListener("pointermove", onPointerMove, opts);
