@@ -125,11 +125,9 @@ const techStack = [
           <section class="animate space-y-4 lg:sticky lg:top-24">
             
             <!-- Now Playing Widget -->
-            <a 
+            <div 
               id="now-playing-widget" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              class="flex items-center gap-3 px-4 py-3 rounded-lg border border-white/8 transition-all hover:bg-white/5 hover:border-white/15 cursor-pointer block" 
+              class="flex items-center gap-3 px-4 py-3 rounded-lg border border-white/8 transition-all hover:bg-white/5 hover:border-white/15 cursor-pointer" 
               style="background-color: var(--bg-subtle);"
             >
               <audio id="np-audio" preload="auto"></audio>
@@ -141,11 +139,11 @@ const techStack = [
                   </svg>
                 </div>
                 <!-- Vinyl record peeking out -->
-                <div id="np-vinyl-wrapper" class="absolute top-0.5 left-0.5 size-9 z-0 hidden cursor-grab active:cursor-grabbing">
-                  <img id="np-vinyl" src={vinylImg.src} alt="Vinyl" class="size-full rounded-full object-contain pointer-events-none" />
+                <div id="np-vinyl-wrapper" class="absolute top-0.5 left-0.5 size-9 z-20 hidden cursor-grab active:cursor-grabbing" style="touch-action: none;">
+                  <img id="np-vinyl" src={vinylImg.src} alt="Vinyl" class="size-full rounded-full object-contain pointer-events-none select-none" draggable="false" />
                 </div>
               </div>
-              <div class="flex-1 min-w-0">
+              <div id="np-info" class="flex-1 min-w-0 cursor-pointer">
                 <div class="flex items-center gap-2 mb-0.5">
                   <span id="np-label" class="text-xs uppercase tracking-wider text-ghost">not playing</span>
                   <span id="np-bars" class="hidden flex gap-0.5 items-end h-3">
@@ -157,7 +155,7 @@ const techStack = [
                 <div id="np-title" class="text-sm font-medium truncate hidden text-primary"></div>
                 <div id="np-artist" class="text-xs truncate hidden text-faint"></div>
               </div>
-            </a>
+            </div>
 
             <!-- Connect -->
             <div class="pt-6">
@@ -253,7 +251,7 @@ const techStack = [
       if (els.placeholder) els.placeholder.classList.remove("hidden");
       if (els.title) { els.title.classList.add("hidden"); els.title.textContent = ""; }
       if (els.artist) { els.artist.classList.add("hidden"); els.artist.textContent = ""; }
-      if (els.widget) els.widget.removeAttribute("href");
+      if (els.widget) els.widget.removeAttribute("data-href");
       if (els.audio) { els.audio.pause(); els.audio.removeAttribute("src"); }
       if (els.vinylWrap) {
         els.vinylWrap.classList.add("hidden");
@@ -279,7 +277,7 @@ const techStack = [
           if (els.placeholder) els.placeholder.classList.add("hidden");
           if (els.title) { els.title.textContent = spotify.song; els.title.classList.remove("hidden"); }
           if (els.artist) { els.artist.textContent = spotify.artist; els.artist.classList.remove("hidden"); }
-          if (els.widget) els.widget.href = `https://open.spotify.com/track/${spotify.track_id}`;
+          if (els.widget) els.widget.setAttribute("data-href", `https://open.spotify.com/track/${spotify.track_id}`);
           if (els.vinylWrap) els.vinylWrap.classList.remove("hidden");
           
           if (els.audio && !els.audio.src) {
@@ -324,8 +322,9 @@ const techStack = [
     let vinylState = {
       isDragging: false,
       currentAngle: 0,
-      lastAngle: 0,
-      lastTime: 0
+      lastPointerAngle: 0,
+      lastTime: 0,
+      angularVelocity: 0
     };
 
     let scratchController = null;
@@ -334,6 +333,8 @@ const techStack = [
       const vinylWrap = document.getElementById("np-vinyl-wrapper");
       const vinyl = document.getElementById("np-vinyl");
       const audio = document.getElementById("np-audio");
+      const widget = document.getElementById("now-playing-widget");
+      const npInfo = document.getElementById("np-info");
       
       if (!vinylWrap || !vinyl || !audio) return;
 
@@ -342,14 +343,26 @@ const techStack = [
       const opts = { signal: scratchController.signal };
 
       let cx, cy;
-
-      let velocity = 0;
-      let targetRate = 1.0;
       let currentRate = 1.0;
       let loopId = null;
 
+      // Open Spotify only when clicking the text/info area, not the vinyl
+      if (npInfo) {
+        npInfo.addEventListener("click", () => {
+          const href = widget?.getAttribute("data-href");
+          if (href) window.open(href, "_blank", "noopener,noreferrer");
+        }, opts);
+      }
+
+      function getPointerAngle(e) {
+        return Math.atan2(e.clientY - cy, e.clientX - cx);
+      }
+
       function onPointerDown(e) {
         if (!audio.src) return;
+        e.preventDefault();
+        e.stopPropagation();
+        
         vinylState.isDragging = true;
         vinyl.classList.add("is-dragging");
         
@@ -357,69 +370,75 @@ const techStack = [
         cx = rect.left + rect.width / 2;
         cy = rect.top + rect.height / 2;
 
-        vinylState.lastAngle = Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI;
+        vinylState.lastPointerAngle = getPointerAngle(e);
         vinylState.lastTime = performance.now();
+        vinylState.angularVelocity = 0;
         
         vinylWrap.setPointerCapture(e.pointerId);
-        e.preventDefault();
-        
-        if (loopId) cancelAnimationFrame(loopId);
+        if (loopId) { cancelAnimationFrame(loopId); loopId = null; }
       }
 
       function onPointerMove(e) {
         if (!vinylState.isDragging) return;
+        e.preventDefault();
         
-        const currentAngle = Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI;
-        const currentTime = performance.now();
+        const angle = getPointerAngle(e);
+        const now = performance.now();
         
-        let deltaAngle = currentAngle - vinylState.lastAngle;
-        if (deltaAngle > 180) deltaAngle -= 360;
-        if (deltaAngle < -180) deltaAngle += 360;
+        let delta = angle - vinylState.lastPointerAngle;
+        // Normalize to [-PI, PI]
+        if (delta > Math.PI) delta -= 2 * Math.PI;
+        if (delta < -Math.PI) delta += 2 * Math.PI;
 
-        const deltaTime = currentTime - vinylState.lastTime;
+        const dt = (now - vinylState.lastTime) / 1000; // seconds
         
-        if (deltaTime > 0) {
-          vinylState.currentAngle += deltaAngle;
+        if (dt > 0) {
+          const deltaDeg = delta * (180 / Math.PI);
+          vinylState.currentAngle += deltaDeg;
           vinyl.style.transform = `rotate(${vinylState.currentAngle}deg)`;
           
-          velocity = deltaAngle / deltaTime;
-          const speedMultiplier = Math.abs(velocity) * 4; 
-          targetRate = 1.0 + speedMultiplier;
+          // Smooth the velocity with exponential moving average
+          const instantVelocity = delta / dt; // rad/s
+          vinylState.angularVelocity = vinylState.angularVelocity * 0.6 + instantVelocity * 0.4;
           
-          if (targetRate > 4.0) targetRate = 4.0;
-          if (targetRate < 0.25) targetRate = 0.25;
+          // Map angular velocity to playback rate
+          const speed = Math.abs(vinylState.angularVelocity);
+          const newRate = Math.min(4.0, Math.max(0.25, 1.0 + speed * 0.15));
+          currentRate = newRate;
           
-          currentRate = targetRate;
           if (!audio.paused) {
-             audio.playbackRate = currentRate;
+            audio.playbackRate = currentRate;
           }
         }
         
-        vinylState.lastAngle = currentAngle;
-        vinylState.lastTime = currentTime;
+        vinylState.lastPointerAngle = angle;
+        vinylState.lastTime = now;
       }
       
       function inertiaLoop() {
         if (vinylState.isDragging) return;
         
+        // Decay angular velocity
+        vinylState.angularVelocity *= 0.96;
+        
         // Smoothly return playback rate to 1.0
-        currentRate += (1.0 - currentRate) * 0.03; // Friction
+        currentRate += (1.0 - currentRate) * 0.05;
         
         if (audio && !audio.paused) {
-          audio.playbackRate = currentRate;
+          audio.playbackRate = Math.max(0.25, Math.min(4.0, currentRate));
         }
 
-        // Apply remaining velocity to visually spin the record smoothly
-        velocity *= 0.95; // Friction for visual spin
-        const baseSpin = 2; // Normal spin speed (deg per frame)
-        vinylState.currentAngle += baseSpin + (velocity * 16); 
+        // Keep spinning visually based on remaining velocity
+        const degPerFrame = vinylState.angularVelocity * (180 / Math.PI) * (1/60);
+        vinylState.currentAngle += degPerFrame + 1.5; // 1.5 = base spin
         vinyl.style.transform = `rotate(${vinylState.currentAngle}deg)`;
 
-        // Stop the loop when we're close enough to normal
-        if (Math.abs(currentRate - 1.0) < 0.01 && Math.abs(velocity) < 0.01) {
-          audio.playbackRate = 1.0;
+        // Stop when settled
+        if (Math.abs(currentRate - 1.0) < 0.005 && Math.abs(vinylState.angularVelocity) < 0.1) {
+          if (audio && !audio.paused) audio.playbackRate = 1.0;
+          currentRate = 1.0;
           vinyl.classList.remove("is-dragging");
-          vinyl.style.transform = ''; // give control back to CSS
+          vinyl.style.transform = '';
           loopId = null;
           return;
         }
@@ -432,15 +451,9 @@ const techStack = [
         vinylState.isDragging = false;
         vinylWrap.releasePointerCapture(e.pointerId);
         
-        // Start smooth deceleration
+        // Start smooth deceleration loop
         if (!loopId) loopId = requestAnimationFrame(inertiaLoop);
       }
-
-      // Prevent Spotify link from opening when clicking/dragging the vinyl
-      vinylWrap.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }, opts);
 
       vinylWrap.addEventListener("pointerdown", onPointerDown, opts);
       vinylWrap.addEventListener("pointermove", onPointerMove, opts);
