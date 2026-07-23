@@ -444,9 +444,12 @@ const techStack = [
           vinylState.angularVelocity = vinylState.angularVelocity * 0.6 + instantVelocity * 0.4;
           
           // Map angular velocity to playback rate
-          const speed = Math.abs(vinylState.angularVelocity);
-          const newRate = Math.min(4.0, Math.max(0.25, 1.0 + speed * 0.15));
-          currentRate = newRate;
+          // Normal CSS animation is 3s per 360deg = ~2.1 rad/s -> maps to 1.0x speed
+          const expectedNormalSpeed = 2.1;
+          let newRate = Math.abs(vinylState.angularVelocity / expectedNormalSpeed);
+          
+          // Clamp between 0.1 and 4.0
+          currentRate = Math.max(0.1, Math.min(4.0, newRate));
           
           if (!audio.paused) {
             audio.playbackRate = currentRate;
