@@ -1,7 +1,7 @@
 import { config, fields, collection } from '@keystatic/core';
 
 export default config({
-  storage: import.meta.env.DEV 
+  storage: process.env.NODE_ENV === 'development'
     ? { kind: 'local' } 
     : { kind: 'github', repo: 'emindmrts/emindev.net' },
   collections: {
