@@ -9,7 +9,6 @@ import vercel from "@astrojs/vercel";
 export default defineConfig({
   site: "https://astro-micro.vercel.app",
   integrations: [sitemap(), mdx(), pagefind()],
-  output: "server",
   adapter: vercel(),
   vite: {
     plugins: [tailwindcss()],
