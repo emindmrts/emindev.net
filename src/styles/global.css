@@ -4,10 +4,58 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: 'PP Mori';
+  src: url('/fonts/PPMori-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Mori';
+  src: url('/fonts/PPMori-RegularItalic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Mori';
+  src: url('/fonts/PPMori-SemiBold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Mori';
+  src: url('/fonts/PPMori-SemiBoldItalic.otf') format('opentype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Mori';
+  src: url('/fonts/PPMori-Extralight.otf') format('opentype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Mori';
+  src: url('/fonts/PPMori-ExtralightItalic.otf') format('opentype');
+  font-weight: 200;
+  font-style: italic;
+  font-display: swap;
+}
+
 @theme {
-  --font-sans: Geist Sans, ui-sans-serif, system-ui, sans-serif,
+  --font-sans: PP Mori, ui-sans-serif, system-ui, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-mono: Geist Mono, ui-monospace, SFMono-Regular, Menlo, Monaco,
+  --font-mono: PP Mori, ui-monospace, SFMono-Regular, Menlo, Monaco,
     Consolas, 'Liberation Mono', 'Courier New', monospace;
 }
 
@@ -32,7 +80,7 @@
 @layer utilities {
   html {
     overflow-y: auto;
-    color-scheme: light;
+    color-scheme: dark;
     scroll-padding-top: 100px;
   }
 
@@ -48,14 +96,12 @@
   body {
     @apply font-sans antialiased;
     @apply flex flex-col;
-    @apply bg-neutral-100 dark:bg-neutral-900;
-    @apply text-black/75 dark:text-white/75;
+    background-color: #0c0a08;
+    color: #eceae6;
   }
 
   header {
-    @apply fixed left-0 right-0 top-0 z-50 py-6;
-    @apply bg-neutral-100/75 dark:bg-neutral-900/75;
-    @apply saturate-200 backdrop-blur-xs;
+    @apply fixed left-0 right-0 top-0 z-50 py-4 border-b border-white/10 bg-[#0c0a08]/80 backdrop-blur-md transition-all duration-300;
   }
 
   main {
@@ -75,13 +121,13 @@
 
 @layer utilities {
   article a {
-    @apply font-sans text-current underline underline-offset-[3px];
-    @apply decoration-black/30 dark:decoration-white/30;
+    @apply font-sans text-blue-400 underline underline-offset-[3px];
+    @apply decoration-blue-400/40;
     @apply transition-colors duration-300 ease-in-out;
   }
   article a:hover {
-    @apply text-black dark:text-white;
-    @apply decoration-black/50 dark:decoration-white/50;
+    @apply text-blue-300;
+    @apply decoration-blue-300/60;
   }
 }
 
@@ -104,10 +150,24 @@ html.scrolled #back-to-top {
 
 /* shiki config */
 pre {
-  @apply border border-black/15 py-5 dark:border-white/20;
+  @apply border border-white/8 py-5;
 }
 
 :root {
+  /* Design tokens */
+  --text-primary: #eceae6;
+  --text-muted: 0.7;
+  --text-faint: 0.5;
+  --text-ghost: 0.4;
+  --bg-base: #0c0a08;
+  --bg-subtle: rgba(255, 255, 255, 0.03);
+  --bg-hover: rgba(255, 255, 255, 0.05);
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --accent: #60a5fa;
+  --accent-bg: rgba(59, 130, 246, 0.25);
+  --accent-border: rgba(96, 165, 250, 0.5);
+
+  /* Shiki config */
   --astro-code-foreground: #09090b;
   --astro-code-background: #fafafa;
   --astro-code-token-comment: #a19595;
@@ -121,9 +181,15 @@ pre {
   --astro-code-token-link: #8d85ff;
 }
 
+/* Design token utilities */
+.text-primary { color: var(--text-primary); }
+.text-muted { color: var(--text-primary); opacity: var(--text-muted); }
+.text-faint { color: var(--text-primary); opacity: var(--text-faint); }
+.text-ghost { color: var(--text-primary); opacity: var(--text-ghost); }
+
 .dark {
-  --astro-code-foreground: #fafafa;
-  --astro-code-background: #09090b;
+  --astro-code-foreground: #f0f0f0;
+  --astro-code-background: #111111;
   --astro-code-token-comment: #a19595;
   --astro-code-token-keyword: #f47067;
   --astro-code-token-string: #00a99a;
@@ -137,13 +203,176 @@ pre {
 
 /* copy code button on codeblocks */
 .copy-code {
-  @apply absolute right-3 top-3 grid size-9 place-content-center rounded-sm border border-black/15 bg-neutral-100 text-center duration-300 ease-in-out dark:border-white/20 dark:bg-neutral-900;
+  @apply absolute right-3 top-3 grid size-9 place-content-center rounded-sm border border-white/8 bg-[#111111] text-center duration-300 ease-in-out;
 }
 
 .copy-code:hover {
-  @apply bg-[#E9E9E9] transition-colors dark:bg-[#232323];
+  @apply bg-[#232323] transition-colors;
 }
 
 .copy-code:active {
   @apply scale-90 transition-transform;
+}
+
+/* Ambient Glow Effects */
+.ambient-glow-left {
+  position: fixed;
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vh;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.05) 0%, rgba(12, 10, 8, 0) 70%);
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.ambient-glow-right {
+  position: fixed;
+  bottom: -10%;
+  right: -10%;
+  width: 50vw;
+  height: 50vh;
+  background: radial-gradient(circle, rgba(250, 165, 96, 0.03) 0%, rgba(12, 10, 8, 0) 70%);
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ═══════════════════════════════════════
+   Micro-interaction Keyframes
+   ═══════════════════════════════════════ */
+
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.15); }
+}
+
+@keyframes glow-border {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); }
+  50% { box-shadow: 0 0 8px 0 rgba(96, 165, 250, 0.15); }
+}
+
+@keyframes fade-slide-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tag-bounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.93); }
+  100% { transform: scale(1); }
+}
+
+/* Micro-interaction utilities */
+.mi-lift {
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+.mi-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(96, 165, 250, 0.08);
+}
+
+.mi-scale {
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease, background-color 200ms ease;
+}
+.mi-scale:hover {
+  transform: scale(1.02);
+}
+
+.mi-glow:hover {
+  border-color: rgba(96, 165, 250, 0.3) !important;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.08);
+}
+
+.mi-tag-bounce:active {
+  animation: tag-bounce 250ms ease;
+}
+
+.mi-fade-in {
+  animation: fade-slide-in 250ms ease both;
+}
+
+.mi-status-pulse {
+  animation: status-pulse 2s ease-in-out infinite;
+}
+
+/* Nav underline slide-in */
+.mi-nav-link {
+  position: relative;
+}
+.mi-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--text-primary);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 250ms ease;
+}
+.mi-nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Profile photo hover */
+.mi-photo {
+  transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
+}
+.mi-photo:hover {
+  transform: scale(1.03);
+  border-color: rgba(96, 165, 250, 0.3);
+  box-shadow: 0 0 20px rgba(96, 165, 250, 0.1);
+}
+
+/* Accessibility: disable all micro-interactions for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .mi-lift:hover,
+  .mi-scale:hover,
+  .mi-photo:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .mi-tag-bounce:active {
+    animation: none;
+  }
+  .mi-fade-in {
+    animation: none;
+  }
+  .mi-status-pulse {
+    animation: none;
+  }
+  .mi-nav-link::after {
+    transition: none;
+  }
+  #now-playing-widget:hover #np-vinyl-wrapper {
+    transform: none;
+  }
+  #now-playing-widget:hover #np-vinyl {
+    animation: none;
+  }
+}
+
+/* Now Playing — vinyl peek on hover */
+@keyframes cover-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+#np-vinyl-wrapper {
+  transition: transform 400ms ease-in;
+}
+
+#now-playing-widget:hover #np-vinyl-wrapper {
+  transform: translateX(14px);
+  transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#now-playing-widget:hover #np-vinyl {
+  animation: cover-spin 3s linear infinite;
 }

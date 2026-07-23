@@ -1,11 +1,12 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import Container from "@components/Container.astro";
+import HomeContainer from "@components/HomeContainer.astro";
 import { SITE, HOME, SOCIALS } from "@consts";
 import ArrowCard from "@components/ArrowCard.astro";
 import Link from "@components/Link.astro";
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
+import vinylImg from "@assets/vinyl.png";
 
 const blog = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
@@ -18,128 +19,326 @@ const projects: CollectionEntry<"projects">[] = (
   .filter((project) => !project.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
+
+const techStack = [
+  { name: "TypeScript", icon: "typescript" },
+  { name: "JavaScript", icon: "javascript" },
+  { name: "React", icon: "react" },
+  { name: "Next.js", icon: "nextdotjs" },
+  { name: "Node.js", icon: "nodedotjs" },
+  { name: "GitHub", icon: "github" },
+  { name: "VS Code", icon: "visualstudiocode" },
+  { name: "Prisma", icon: "prisma" },
+  { name: "Figma", icon: "figma" },
+  { name: "Tailwind CSS", icon: "tailwindcss" },
+  { name: "AWS", icon: "amazonwebservices" },
+  { name: "Redis", icon: "redis" },
+  { name: "MySQL", icon: "mysql" },
+  { name: "Supabase", icon: "supabase" },
+];
 ---
 
 <Layout title={HOME.TITLE} description={HOME.DESCRIPTION}>
-  <Container>
+  <div class="ambient-glow-left"></div>
+  <div class="ambient-glow-right"></div>
+  
+  <HomeContainer>
     <aside data-pagefind-ignore>
-      <h1 class="font-semibold text-black dark:text-white">
-        Introducing Astro Micro 🔬
-      </h1>
-      <div class="space-y-16">
-        <section>
-          <article class="space-y-4">
-            <span>
-              <p>
-                Astro Micro is an accessible theme for <Link
-                  href="https://astro.build/">Astro</Link
-                >. It's a fork of
-                <Link href="https://github.com/markhorn-dev">
-                  Mark Horn's
-                </Link> popular theme <Link
-                  href="https://astro.build/themes/details/astronano/"
-                  >Astro Nano</Link
-                >. Like Nano, Micro comes with zero frameworks installed.
-              </p>
-              <p>
-                Micro adds features like <Link href="https://pagefind.app/"
-                  >Pagefind</Link
-                > for search, <Link href="https://giscus.app">Giscus</Link> for comments,
-                and more. For a full list of changes, see this <Link
-                  href="/blog/00-micro-changelog">blog post</Link
-                >.
-              </p>
-            </span>
-            <span class="animate">
-              <p>
-                Micro still comes with everything great about Nano — full type
-                safety, a sitemap, an RSS feed, and Markdown + MDX support.
-                Styled with TailwindCSS and preconfigured with system, light,
-                and dark themes.
-              </p>
-              <p>
-                Visit
-                <Link href="https://github.com/trevortylerlee/astro-micro">
-                  Astro Micro on GitHub
-                </Link>
-                to fork the repository to get started.
-              </p>
-            </span>
-          </article>
-        </section>
-
-        <section class="animate space-y-6">
-          <div class="flex flex-wrap items-center justify-between gap-y-2">
-            <h2 class="font-semibold text-black dark:text-white">
-              Latest posts
-            </h2>
-            <Link href="/blog"> See all posts </Link>
-          </div>
-          <ul class="not-prose flex flex-col gap-4">
-            {
-              blog.map((post) => (
-                <li>
-                  <ArrowCard entry={post} />
-                </li>
-              ))
-            }
-          </ul>
-        </section>
-
-        <section class="animate space-y-6">
-          <div class="flex flex-wrap items-center justify-between gap-y-2">
-            <h2 class="font-semibold text-black dark:text-white">
-              Recent projects
-            </h2>
-            <Link href="/projects"> See all projects </Link>
-          </div>
-          <ul class="not-prose flex flex-col gap-4">
-            {
-              projects.map((project) => (
-                <li>
-                  <ArrowCard entry={project} />
-                </li>
-              ))
-            }
-          </ul>
-        </section>
-
-        <section class="animate space-y-4">
-          <h2 class="font-semibold text-black dark:text-white">
-            Let's Connect
-          </h2>
-          <article>
-            <p>
-              If you want to get in touch with me about something or just to say
-              hi, reach out on social media or send me an email.
+      <div class="lg:grid lg:grid-cols-12 lg:gap-12 space-y-16 lg:space-y-0">
+        
+        <!-- LEFT COLUMN: Profile & Status -->
+        <div class="lg:col-span-3 space-y-8">
+          <section class="animate">
+            <h1 class="text-2xl font-semibold text-primary">
+              hiya! i'm emin
+            </h1>
+            <p class="mt-3 text-sm text-muted">
+              junior web developer · building things on the web
             </p>
-          </article>
-          <ul class="not-prose flex flex-wrap gap-2">
-            {
-              SOCIALS.map((SOCIAL) => (
-                <li class="flex gap-x-2 text-nowrap">
-                  <Link
-                    href={SOCIAL.HREF}
-                    external
-                    aria-label={`${SITE.TITLE} on ${SOCIAL.NAME}`}
-                  >
-                    {SOCIAL.NAME}
-                  </Link>
-                  {"/"}
-                </li>
-              ))
-            }
-            <li class="line-clamp-1">
-              <Link
-                href={`mailto:${SITE.EMAIL}`}
-                aria-label={`Email ${SITE.TITLE}`}
-              >
-                {SITE.EMAIL}
-              </Link>
-            </li>
-          </ul>
-        </section>
+            
+            <div class="mt-8 space-y-4">
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-ghost">Tech Stack</h3>
+              <div class="flex flex-wrap gap-1.5">
+                {
+                  techStack.map((tech) => (
+                    <div 
+                      class="flex items-center gap-1.5 text-[11px] px-2 py-1 rounded border border-white/5 cursor-default text-primary mi-lift" 
+                      style="background-color: var(--bg-subtle); opacity: 0.85;"
+                      title={tech.name}
+                    >
+                      <img 
+                        src={`https://cdn.simpleicons.org/${tech.icon}/white`} 
+                        alt={tech.name} 
+                        class="w-3.5 h-3.5 opacity-80" 
+                        loading="lazy"
+                      />
+                      <span>{tech.name}</span>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- CENTER COLUMN: Content (Blog & Projects) -->
+        <div class="lg:col-span-6 space-y-12">
+          <section class="animate space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-y-2">
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-faint">
+                writing
+              </h2>
+              <Link href="/blog"> See all posts </Link>
+            </div>
+            <ul class="not-prose flex flex-col gap-4">
+              {
+                blog.map((post) => (
+                  <li>
+                    <ArrowCard entry={post} />
+                  </li>
+                ))
+              }
+            </ul>
+          </section>
+
+          <section class="animate space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-y-2">
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-faint">
+                projects
+              </h2>
+              <Link href="/projects"> See all projects </Link>
+            </div>
+            <ul class="not-prose flex flex-col gap-4">
+              {
+                projects.map((project) => (
+                  <li>
+                    <ArrowCard entry={project} />
+                  </li>
+                ))
+              }
+            </ul>
+          </section>
+        </div>
+
+        <!-- RIGHT COLUMN: Widgets & Socials -->
+        <div class="lg:col-span-3 space-y-8">
+          <section class="animate space-y-4 lg:sticky lg:top-24">
+            
+            <!-- Now Playing Widget -->
+            <a 
+              id="now-playing-widget" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="flex items-center gap-3 px-4 py-3 rounded-lg border border-white/8 transition-all hover:bg-white/5 hover:border-white/15 cursor-pointer block" 
+              style="background-color: var(--bg-subtle);"
+            >
+              <audio id="np-audio" preload="auto"></audio>
+              <div id="np-cover-wrap" class="flex-shrink-0 relative size-10 z-10">
+                <img id="np-cover" src="" alt="Album cover" class="size-full rounded relative z-10 object-cover hidden" />
+                <div id="np-cover-placeholder" class="size-full rounded flex items-center justify-center relative z-10" style="background-color: var(--bg-hover);">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="opacity: 0.3;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m9 19 3-3m0 0 3 3m-3-3V6a1 1 0 0 1 1-1h5" />
+                  </svg>
+                </div>
+                <!-- Vinyl record peeking out -->
+                <div id="np-vinyl-wrapper" class="absolute top-0.5 left-0.5 size-9 z-0 pointer-events-none hidden">
+                  <img id="np-vinyl" src={vinylImg.src} alt="Vinyl" class="size-full rounded-full object-contain" />
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-0.5">
+                  <span id="np-label" class="text-xs uppercase tracking-wider text-ghost">not playing</span>
+                  <span id="np-bars" class="hidden flex gap-0.5 items-end h-3">
+                    <span class="w-0.5 rounded-full bg-green-400" style="height: 40%; animation: npBar 0.8s ease-in-out infinite alternate;"></span>
+                    <span class="w-0.5 rounded-full bg-green-400" style="height: 80%; animation: npBar 0.8s ease-in-out 0.2s infinite alternate;"></span>
+                    <span class="w-0.5 rounded-full bg-green-400" style="height: 60%; animation: npBar 0.8s ease-in-out 0.4s infinite alternate;"></span>
+                  </span>
+                </div>
+                <div id="np-title" class="text-sm font-medium truncate hidden text-primary"></div>
+                <div id="np-artist" class="text-xs truncate hidden text-faint"></div>
+              </div>
+            </a>
+
+            <!-- Connect -->
+            <div class="pt-6">
+              <h2 class="text-xs font-semibold uppercase tracking-wider mb-4 text-ghost">
+                connect
+              </h2>
+              <div class="flex flex-col gap-2">
+                {
+                  SOCIALS.map((SOCIAL) => {
+                    const nameLower = SOCIAL.NAME.toLowerCase();
+                    const iconUrl = nameLower.includes("github") 
+                      ? "https://cdn.simpleicons.org/github/white" 
+                      : nameLower.includes("instagram")
+                        ? "https://cdn.simpleicons.org/instagram/white"
+                        : (nameLower.includes("twitter") || nameLower.includes("x"))
+                          ? "https://cdn.simpleicons.org/x/white"
+                          : null;
+                    return (
+                      <a
+                        href={SOCIAL.HREF}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${SITE.TITLE} on ${SOCIAL.NAME}`}
+                        class="group flex items-center justify-between px-3 py-2.5 rounded-lg border border-white/5 transition-all duration-300 hover:bg-white/5 hover:border-white/10 mi-glow"
+                        style="background-color: var(--bg-subtle);"
+                      >
+                        <div class="flex items-center gap-2.5">
+                          {iconUrl ? (
+                            <img src={iconUrl} alt={SOCIAL.NAME} class="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity" />
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-60 group-hover:opacity-100 transition-opacity text-primary"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                          )}
+                          <span class="text-sm font-medium text-primary">{SOCIAL.NAME}</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-30 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 text-primary"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+                      </a>
+                    );
+                  })
+                }
+                <a
+                  href={`mailto:${SITE.EMAIL}`}
+                  aria-label={`Email ${SITE.TITLE}`}
+                  class="group flex items-center justify-between px-3 py-2.5 rounded-lg border border-white/5 transition-all duration-300 hover:bg-white/5 hover:border-white/10 mt-1 mi-glow"
+                  style="background-color: var(--bg-subtle);"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-60 group-hover:opacity-100 transition-opacity text-primary"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    <span class="text-sm font-medium text-primary">Email Me</span>
+                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-30 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1 text-primary"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+              </div>
+            </div>
+          </section>
+        </div>
+
       </div>
     </aside>
-  </Container>
+  </HomeContainer>
 </Layout>
+
+<style>
+  @keyframes npBar {
+    from { transform: scaleY(0.4); }
+    to   { transform: scaleY(1); }
+  }
+</style>
+
+<script is:inline data-discord-id="1133067172298633336">
+  (() => {
+    const DISCORD_ID = document.querySelector("script[data-discord-id]")?.getAttribute("data-discord-id") || "";
+
+    function getElements() {
+      return {
+        label: document.getElementById("np-label"),
+        bars: document.getElementById("np-bars"),
+        cover: document.getElementById("np-cover"),
+        placeholder: document.getElementById("np-cover-placeholder"),
+        title: document.getElementById("np-title"),
+        artist: document.getElementById("np-artist"),
+        widget: document.getElementById("now-playing-widget"),
+        vinylWrap: document.getElementById("np-vinyl-wrapper"),
+        vinyl: document.getElementById("np-vinyl"),
+        audio: document.getElementById("np-audio"),
+      };
+    }
+
+    function setNotPlaying(els) {
+      if (!els) els = getElements();
+      if (els.label) els.label.textContent = "not playing";
+      if (els.bars) els.bars.classList.add("hidden");
+      if (els.cover) { els.cover.classList.add("hidden"); els.cover.src = ""; }
+      if (els.placeholder) els.placeholder.classList.remove("hidden");
+      if (els.title) { els.title.classList.add("hidden"); els.title.textContent = ""; }
+      if (els.artist) { els.artist.classList.add("hidden"); els.artist.textContent = ""; }
+      if (els.widget) els.widget.removeAttribute("href");
+      if (els.audio) { els.audio.pause(); els.audio.removeAttribute("src"); }
+      if (els.vinylWrap) {
+        els.vinylWrap.classList.add("hidden");
+      }
+    }
+
+    async function fetchNowPlaying() {
+      const els = getElements();
+      if (!els.label) return;
+
+      try {
+        const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_ID}`);
+        if (!res.ok) { setNotPlaying(els); return; }
+        const data = await res.json();
+        if (!data.success) { setNotPlaying(els); return; }
+
+        const spotify = data.data?.spotify;
+
+        if (spotify) {
+          els.label.textContent = "now playing";
+          if (els.bars) { els.bars.classList.remove("hidden"); els.bars.style.display = "flex"; }
+          if (els.cover) { els.cover.src = spotify.album_art_url; els.cover.classList.remove("hidden"); }
+          if (els.placeholder) els.placeholder.classList.add("hidden");
+          if (els.title) { els.title.textContent = spotify.song; els.title.classList.remove("hidden"); }
+          if (els.artist) { els.artist.textContent = spotify.artist; els.artist.classList.remove("hidden"); }
+          if (els.widget) els.widget.href = `https://open.spotify.com/track/${spotify.track_id}`;
+          if (els.vinylWrap) els.vinylWrap.classList.remove("hidden");
+          
+          if (els.audio && !els.audio.src) {
+            try {
+              const apiRes = await fetch(`/api/spotify?track_id=${spotify.track_id}`);
+              if (apiRes.ok) {
+                const apiData = await apiRes.json();
+                if (apiData.previewUrl) {
+                  els.audio.src = apiData.previewUrl;
+                }
+              }
+            } catch (e) {
+              console.warn("[NowPlaying] Backend fetch error:", e);
+            }
+          }
+        } else {
+          setNotPlaying(els);
+        }
+      } catch (e) {
+        console.warn("[NowPlaying] fetch error:", e);
+        setNotPlaying(els);
+      }
+    }
+
+    let intervalId = null;
+
+    function handleMouseEnter() {
+      const audio = document.getElementById("np-audio");
+      if (audio && audio.src) {
+        audio.volume = 0.5; // Soft volume for background
+        audio.play().catch(e => console.log("Autoplay prevented:", e));
+      }
+    }
+
+    function handleMouseLeave() {
+      const audio = document.getElementById("np-audio");
+      if (audio) {
+        audio.pause();
+      }
+    }
+
+    function init() {
+      if (intervalId) { clearInterval(intervalId); intervalId = null; }
+      setNotPlaying();
+      fetchNowPlaying();
+      intervalId = setInterval(fetchNowPlaying, 15000);
+      
+      const widget = document.getElementById("now-playing-widget");
+      if (widget) {
+        widget.removeEventListener("mouseenter", handleMouseEnter);
+        widget.removeEventListener("mouseleave", handleMouseLeave);
+        widget.addEventListener("mouseenter", handleMouseEnter);
+        widget.addEventListener("mouseleave", handleMouseLeave);
+      }
+    }
+
+    document.addEventListener("astro:page-load", init);
+    document.addEventListener("astro:before-swap", () => {
+      if (intervalId) { clearInterval(intervalId); intervalId = null; }
+    });
+  })();
+</script>
