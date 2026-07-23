@@ -376,3 +376,7 @@ pre {
 #now-playing-widget:hover #np-vinyl {
   animation: cover-spin 3s linear infinite;
 }
+
+#np-vinyl.is-dragging {
+  animation: none !important;
+}
