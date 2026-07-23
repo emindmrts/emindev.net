@@ -328,6 +328,8 @@ const techStack = [
       lastTime: 0
     };
 
+    let scratchController = null;
+
     function setupVinylScratch() {
       const vinylWrap = document.getElementById("np-vinyl-wrapper");
       const vinyl = document.getElementById("np-vinyl");
@@ -335,9 +337,9 @@ const techStack = [
       
       if (!vinylWrap || !vinyl || !audio) return;
 
-      // Remove old listeners to prevent duplicates on Astro page load
-      vinylWrap.replaceWith(vinylWrap.cloneNode(true));
-      const newVinylWrap = document.getElementById("np-vinyl-wrapper");
+      if (scratchController) scratchController.abort();
+      scratchController = new AbortController();
+      const opts = { signal: scratchController.signal };
 
       let cx, cy;
 
@@ -346,14 +348,14 @@ const techStack = [
         vinylState.isDragging = true;
         vinyl.classList.add("is-dragging");
         
-        const rect = newVinylWrap.getBoundingClientRect();
+        const rect = vinylWrap.getBoundingClientRect();
         cx = rect.left + rect.width / 2;
         cy = rect.top + rect.height / 2;
 
         vinylState.lastAngle = Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI;
         vinylState.lastTime = performance.now();
         
-        newVinylWrap.setPointerCapture(e.pointerId);
+        vinylWrap.setPointerCapture(e.pointerId);
         e.preventDefault();
       }
 
@@ -393,16 +395,16 @@ const techStack = [
         if (!vinylState.isDragging) return;
         vinylState.isDragging = false;
         vinyl.classList.remove("is-dragging");
-        newVinylWrap.releasePointerCapture(e.pointerId);
+        vinylWrap.releasePointerCapture(e.pointerId);
         
         if (audio) audio.playbackRate = 1.0;
         vinyl.style.transform = '';
       }
 
-      newVinylWrap.addEventListener("pointerdown", onPointerDown);
-      newVinylWrap.addEventListener("pointermove", onPointerMove);
-      newVinylWrap.addEventListener("pointerup", onPointerUp);
-      newVinylWrap.addEventListener("pointercancel", onPointerUp);
+      vinylWrap.addEventListener("pointerdown", onPointerDown, opts);
+      vinylWrap.addEventListener("pointermove", onPointerMove, opts);
+      vinylWrap.addEventListener("pointerup", onPointerUp, opts);
+      vinylWrap.addEventListener("pointercancel", onPointerUp, opts);
     }
 
     function init() {
