@@ -3,11 +3,14 @@ import sitemap from "@astrojs/sitemap";
 import mdx from "@astrojs/mdx";
 import pagefind from "astro-pagefind";
 import tailwindcss from "@tailwindcss/vite";
+import vercel from "@astrojs/vercel";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://astro-micro.vercel.app",
   integrations: [sitemap(), mdx(), pagefind()],
+  output: "hybrid",
+  adapter: vercel(),
   vite: {
     plugins: [tailwindcss()],
   },
