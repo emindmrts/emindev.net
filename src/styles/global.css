@@ -356,6 +356,9 @@ pre {
   #now-playing-widget:hover #np-vinyl {
     animation: none;
   }
+  #now-playing-widget:hover #np-info {
+    transform: none;
+  }
 }
 
 /* Now Playing — vinyl peek on hover */
@@ -364,12 +367,17 @@ pre {
   to { transform: rotate(360deg); }
 }
 
-#np-vinyl-wrapper {
+#np-vinyl-wrapper, #np-info {
   transition: transform 400ms ease-in;
 }
 
 #now-playing-widget:hover #np-vinyl-wrapper {
   transform: translateX(14px);
+  transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#now-playing-widget:hover #np-info {
+  transform: translateX(10px);
   transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
