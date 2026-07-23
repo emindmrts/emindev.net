@@ -5,20 +5,18 @@ type Props = {
   entry: CollectionEntry<"blog"> | CollectionEntry<"projects">;
 };
 
-const { entry } = Astro.props as {
-  entry: CollectionEntry<"blog"> | CollectionEntry<"projects">;
-};
+const { entry } = Astro.props;
 ---
 
 <a
   href={`/${entry.collection}/${entry.id}`}
-  class="not-prose group relative flex flex-nowrap rounded-lg border border-black/15 px-4 py-3 pr-10 transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+  class="not-prose group relative flex flex-nowrap rounded-md border border-white/8 px-4 py-3 pr-10 transition-colors duration-300 ease-in-out hover:bg-white/5 hover:text-white focus-visible:bg-white/5 focus-visible:text-white mi-scale mi-glow"
 >
   <div class="flex flex-1 flex-col truncate">
-    <div class="font-semibold">
+    <div class="font-semibold text-white/90">
       {entry.data.title}
     </div>
-    <div class="text-sm">
+    <div class="text-sm text-white/50">
       {entry.data.description}
     </div>
   </div>

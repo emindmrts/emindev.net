@@ -1,0 +1,164 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/Container.astro";
+import Icons from "@components/Icons.astro";
+import { ABOUT } from "@consts";
+---
+
+<Layout title={ABOUT.TITLE} description={ABOUT.DESCRIPTION}>
+  <Container>
+    <div class="space-y-10">
+      <section class="animate">
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+          <div class="flex-shrink-0">
+            <img 
+              src="/image.png" 
+              alt="Profile" 
+              class="w-32 h-32 md:w-40 md:h-40 rounded-lg object-cover border border-white/10 mi-photo"
+              style="background-color: rgba(255, 255, 255, 0.05);"
+            />
+          </div>
+          <div class="flex-1 space-y-4">
+            <div>
+              <h1 class="text-2xl font-semibold text-primary">
+                about me
+              </h1>
+            </div>
+            <article class="prose prose-sm text-muted">
+              <p>
+                Hey, I'm a 14-year-old web developer from Kocaeli, Türkiye.
+              </p>
+              <p>
+                I mainly work with JavaScript-based technologies like TypeScript and Next.js. I enjoy building modern websites and experimenting with new ideas. This website is something I made to improve myself, learn more, and share my projects, skills, and interests. It's also a way for me to practice my English while writing about what I do.
+              </p>
+              <p>
+                I've got a lot of free time, and most of it goes into either coding or just chilling with music. Music is a big part of my day — there's always something playing in the background no matter what I'm doing.
+              </p>
+              <p>
+                I also spend time playing games. I mostly play Minecraft, CS2, and Battlefield 1. There's no real pattern, I just play whatever I feel like at the moment.
+              </p>
+              <p>
+                At the end of the day, I just like building stuff, learning new things, and getting better little by little.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="animate space-y-6">
+        <h2 class="text-sm font-semibold text-faint">
+          what i use
+        </h2>
+        
+        <div class="space-y-6">
+          <!-- Hardware Section -->
+          <div class="space-y-4">
+            <h3 class="text-base font-semibold text-primary">Hardware</h3>
+            <div class="space-y-3">
+              <!-- Custom PC with expand/collapse -->
+              <div class="space-y-2">
+                <button 
+                  class="custom-pc-toggle flex items-center gap-2 text-sm w-full text-left hover:opacity-80 transition-opacity text-primary"
+                  style="opacity: 0.9;"
+                  aria-expanded="false"
+                >
+                  <Icons name="desktop" class="w-4 h-4 flex-shrink-0" />
+                  <span class="font-medium">Custom PC</span>
+                  <Icons name="chevronDown" class="w-4 h-4 flex-shrink-0 transition-transform chevron" />
+                </button>
+                <div class="custom-pc-details hidden pl-6 text-xs" style="color: var(--text-primary); opacity: 0.6;">
+                  <ul class="space-y-1">
+                    <li>• COOLER MASTER MASTERLIQUID ML240L V2</li>
+                    <li>• RYZEN 5 7600</li>
+                    <li>• ASUS DUAL GeForce RTX 4070 SUPER EVO OC</li>
+                    <li>• KINGSTON 1TB NV3 SSD</li>
+                    <li>• ASUS PRİME B650M-K</li>
+                    <li>• GSKILL 16GB (1x16GB) RİPJAWS S5 DDR5 RAM</li>
+                    <li>• COOLER MASTER TD500 V2 MESH ARGB 700W 80+ ATX MİD TOWER KASA</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 text-sm text-muted">
+                <Icons name="laptop" class="w-4 h-4 flex-shrink-0" />
+                <span>Lenovo Thinkpad (Laptop)</span>
+              </div>
+
+              <div class="flex items-center gap-2 text-sm text-muted">
+                <Icons name="phone" class="w-4 h-4 flex-shrink-0" />
+                <span>Nothing 4a</span>
+              </div>
+
+              <div class="flex items-center gap-2 text-sm text-muted">
+                <Icons name="headphones" class="w-4 h-4 flex-shrink-0" />
+                <span>Steel Series Nova 3p (Headphones)</span>
+              </div>
+
+              <div class="flex items-center gap-2 text-sm text-muted">
+                <Icons name="monitor" class="w-4 h-4 flex-shrink-0" />
+                <span>Studio Display</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Software Section -->
+          <div class="space-y-4">
+            <h3 class="text-base font-semibold text-primary">Software</h3>
+            <div class="space-y-3">
+              <div class="flex items-center gap-2 text-sm text-muted">
+                <Icons name="code" class="w-4 h-4 flex-shrink-0" />
+                <span>VS Code</span>
+              </div>
+              
+              <div class="flex items-center gap-2 text-sm text-muted">
+                <Icons name="code" class="w-4 h-4 flex-shrink-0" />
+                <span>OpenCode</span>
+              </div>
+
+              <div class="flex items-center gap-2 text-sm text-muted">
+                <Icons name="photo" class="w-4 h-4 flex-shrink-0" />
+                <span>Adobe Photoshop & Lightroom</span>
+              </div>
+
+              <div class="flex items-center gap-2 text-sm text-muted">
+                <Icons name="cube" class="w-4 h-4 flex-shrink-0" />
+                <span>Adobe Suite</span>
+              </div>
+
+              <div class="flex items-center gap-2 text-sm text-muted">
+                <Icons name="browser" class="w-4 h-4 flex-shrink-0" />
+                <span>Helium Browser</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </Container>
+</Layout>
+
+<script is:inline>
+  function initCustomPCToggle() {
+    const toggle = document.querySelector('.custom-pc-toggle');
+    const details = document.querySelector('.custom-pc-details');
+    const chevron = document.querySelector('.chevron');
+
+    if (toggle && details && chevron) {
+      toggle.addEventListener('click', () => {
+        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+
+        if (isExpanded) {
+          details.classList.add('hidden');
+          toggle.setAttribute('aria-expanded', 'false');
+          chevron.style.transform = 'rotate(0deg)';
+        } else {
+          details.classList.remove('hidden');
+          toggle.setAttribute('aria-expanded', 'true');
+          chevron.style.transform = 'rotate(180deg)';
+        }
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', initCustomPCToggle);
+</script>

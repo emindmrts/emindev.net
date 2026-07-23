@@ -2,29 +2,41 @@
 import Container from "@components/Container.astro";
 import Link from "@components/Link.astro";
 import { SITE } from "@consts";
+import { Image } from "astro:assets";
+import logo from "@content/logos/beyazlogo.png";
 ---
 
 <header transition:persist>
   <Container>
-    <div class="flex flex-wrap justify-between gap-y-2">
+    <div class="flex flex-wrap justify-between items-center gap-y-2">
       <Link href="/" underline={false}>
-        <div class="font-semibold">
-          {SITE.TITLE}&nbsp;🔬
+        <div class="flex items-center font-semibold">
+          <Image src={logo} alt={SITE.TITLE} class="h-6 w-auto object-contain" />
         </div>
       </Link>
       <nav class="flex items-center gap-1 text-sm">
-        <Link href="/blog">blog</Link>
-        <span>
+        <Link href="/blog" underline={false}>
+          <span class="mi-nav-link text-white/50 transition-colors duration-300 ease-in-out hover:text-white">blog</span>
+        </Link>
+        <span class="text-white/50">
           {`/`}
         </span>
-        <Link href="/projects">projects</Link>
-        <span>
+        <Link href="/projects" underline={false}>
+          <span class="mi-nav-link text-white/50 transition-colors duration-300 ease-in-out hover:text-white">projects</span>
+        </Link>
+        <span class="text-white/50">
+          {`/`}
+        </span>
+        <Link href="/about" underline={false}>
+          <span class="mi-nav-link text-white/50 transition-colors duration-300 ease-in-out hover:text-white">about</span>
+        </Link>
+        <span class="text-white/50">
           {`/`}
         </span>
         <button
           id="magnifying-glass"
           aria-label="Search"
-          class="flex items-center rounded-sm border border-black/15 bg-neutral-100 px-2 py-1 text-xs transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:bg-neutral-900 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+          class="flex items-center rounded-sm border border-white/10 bg-transparent px-2 py-1 text-xs text-white/50 transition-colors duration-300 ease-in-out hover:text-white focus-visible:text-white"
         >
           <svg
             height="16"

@@ -1,6 +1,6 @@
 export const prerender = false;
 
-export async function GET({ request }) {
+export async function GET({ request }: { request: Request }) {
   const url = new URL(request.url);
   const trackId = url.searchParams.get("track_id");
 

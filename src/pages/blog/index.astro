@@ -1,19 +1,30 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
+import { getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import { BLOG } from "@consts";
 
-const data = (await getCollection("blog"))
+const allPosts = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
+// Tüm etiketleri ve her etiketteki yazı sayılarını hesapla
+const tagCounts = allPosts.reduce((acc, post) => {
+  (post.data.tags || []).forEach((tag) => {
+    acc[tag] = (acc[tag] || 0) + 1;
+  });
+  return acc;
+}, {} as Record<string, number>);
+
+const allTags = Object.keys(tagCounts).sort();
+
+// Yıllara göre tüm yazıları grupla
 type Acc = {
-  [year: string]: CollectionEntry<"blog">[];
+  [year: string]: typeof allPosts;
 };
 
-const posts = data.reduce((acc: Acc, post) => {
+const postsByYear = allPosts.reduce((acc: Acc, post) => {
   const year = post.data.date.getFullYear().toString();
   if (!acc[year]) {
     acc[year] = [];
@@ -22,34 +33,207 @@ const posts = data.reduce((acc: Acc, post) => {
   return acc;
 }, {});
 
-const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
+const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
 ---
 
 <Layout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
+  <div class="ambient-glow-left"></div>
+  <div class="ambient-glow-right"></div>
+
   <Container>
     <aside data-pagefind-ignore>
       <div class="space-y-10">
-        <div class="space-y-4">
-          {
-            years.map((year) => (
-              <section class="animate space-y-4">
-                <div class="font-semibold text-black dark:text-white">
+        
+        <!-- Kategori Filtreleri -->
+        <section class="animate space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-ghost">
+              kategoriler
+            </h2>
+            <button
+              id="clear-filters-btn"
+              type="button"
+              class="text-xs transition-colors hover:underline hidden cursor-pointer"
+              style="color: #60a5fa;"
+            >
+              Filtreleri Temizle
+            </button>
+          </div>
+
+          <div id="tag-container" class="flex flex-wrap gap-2">
+            <!-- Tümü Button -->
+            <button
+              id="all-tags-btn"
+              type="button"
+              class="px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 cursor-pointer mi-tag-bounce"
+              style="background-color: rgba(59, 130, 246, 0.25); color: #60a5fa; border-color: rgba(96, 165, 250, 0.5);"
+            >
+              tümü ({allPosts.length})
+            </button>
+
+            <!-- Tag Buttons -->
+            {
+              allTags.map((tag) => {
+                const count = tagCounts[tag];
+                return (
+                  <button
+                    type="button"
+                    data-tag={tag}
+                    class="category-btn px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 cursor-pointer mi-tag-bounce"
+                    style="background-color: rgba(255, 255, 255, 0.03); color: rgba(236, 234, 230, 0.7); border-color: rgba(255, 255, 255, 0.1);"
+                  >
+                    #{tag} <span class="opacity-60 font-normal">({count})</span>
+                  </button>
+                );
+              })
+            }
+          </div>
+        </section>
+
+        <!-- Yazı Listesi (Yıla Göre) -->
+        <section class="animate space-y-8">
+          <div class="flex items-center justify-between pb-2 border-b border-white/5">
+            <h2 id="section-title" class="text-xs font-semibold uppercase tracking-wider text-ghost">
+              tüm yazılar
+            </h2>
+            <span id="section-count" class="text-xs text-ghost">
+              {allPosts.length} yazı
+            </span>
+          </div>
+
+          <div id="posts-container" class="space-y-8">
+            {years.map((year) => (
+              <div class="year-group space-y-4" data-year={year}>
+                <div class="text-sm font-semibold text-faint">
                   {year}
                 </div>
-                <div>
-                  <ul class="not-prose flex flex-col gap-4">
-                    {posts[year].map((post) => (
-                      <li>
-                        <ArrowCard entry={post} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </section>
-            ))
-          }
-        </div>
+                <ul class="not-prose flex flex-col gap-3">
+                  {postsByYear[year].map((post) => (
+                    <li class="post-item" data-tags={JSON.stringify(post.data.tags || [])}>
+                      <ArrowCard entry={post} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <div id="no-posts-msg" class="py-8 text-center hidden text-faint">
+            <p>Bu kategoride yazı bulunamadı.</p>
+            <button id="reset-no-posts" type="button" class="mt-2 inline-block text-xs text-blue-400 hover:underline cursor-pointer">
+              Tüm yazılara dön
+            </button>
+          </div>
+        </section>
+
       </div>
     </aside>
   </Container>
 </Layout>
+
+<script>
+  // State
+  let selectedTags: string[] = [];
+
+  function applyFilters() {
+    const allBtn = document.getElementById("all-tags-btn") as HTMLButtonElement | null;
+    const clearBtn = document.getElementById("clear-filters-btn") as HTMLButtonElement | null;
+    const categoryBtns = document.querySelectorAll<HTMLButtonElement>(".category-btn");
+    const postItems = document.querySelectorAll<HTMLElement>(".post-item");
+    const yearGroups = document.querySelectorAll<HTMLElement>(".year-group");
+    const sectionTitle = document.getElementById("section-title");
+    const sectionCount = document.getElementById("section-count");
+    const noPostsMsg = document.getElementById("no-posts-msg");
+
+    const ACTIVE_BG = "rgba(59,130,246,0.2)";
+    const ACTIVE_COLOR = "#60a5fa";
+    const ACTIVE_BORDER = "rgba(96,165,250,0.55)";
+    const INACTIVE_BG = "rgba(255,255,255,0.03)";
+    const INACTIVE_COLOR = "rgba(236,234,230,0.65)";
+    const INACTIVE_BORDER = "rgba(255,255,255,0.1)";
+
+    // All button
+    if (allBtn) {
+      const active = selectedTags.length === 0;
+      allBtn.style.cssText = `background-color:${active ? ACTIVE_BG : INACTIVE_BG};color:${active ? ACTIVE_COLOR : INACTIVE_COLOR};border-color:${active ? ACTIVE_BORDER : INACTIVE_BORDER};font-weight:${active ? "600" : "500"};`;
+    }
+
+    // Clear button
+    if (clearBtn) {
+      clearBtn.style.display = selectedTags.length > 0 ? "" : "none";
+    }
+
+    // Category buttons
+    categoryBtns.forEach((btn) => {
+      const tag = btn.getAttribute("data-tag") || "";
+      const active = selectedTags.includes(tag);
+      btn.style.cssText = `background-color:${active ? ACTIVE_BG : INACTIVE_BG};color:${active ? ACTIVE_COLOR : INACTIVE_COLOR};border-color:${active ? ACTIVE_BORDER : INACTIVE_BORDER};font-weight:${active ? "600" : "500"};`;
+      btn.setAttribute("aria-pressed", String(active));
+    });
+
+    // Filter posts
+    let visibleCount = 0;
+    postItems.forEach((item) => {
+      let tags: string[] = [];
+      try { tags = JSON.parse(item.getAttribute("data-tags") || "[]"); } catch {}
+      const visible = selectedTags.length === 0 || selectedTags.some(t => tags.includes(t));
+      item.style.display = visible ? "" : "none";
+      if (visible) {
+        visibleCount++;
+        item.classList.remove("mi-fade-in");
+        void item.offsetWidth;
+        item.classList.add("mi-fade-in");
+      }
+    });
+
+    // Hide empty year groups
+    yearGroups.forEach((group) => {
+      const hasPosts = Array.from(group.querySelectorAll<HTMLElement>(".post-item")).some(p => p.style.display !== "none");
+      group.style.display = hasPosts ? "" : "none";
+    });
+
+    if (sectionTitle) sectionTitle.textContent = selectedTags.length > 0 ? `${selectedTags.join(", ")} yazıları` : "tüm yazılar";
+    if (sectionCount) sectionCount.textContent = `${visibleCount} yazı`;
+    if (noPostsMsg) noPostsMsg.style.display = visibleCount === 0 ? "" : "none";
+  }
+
+  function toggleTag(tag: string | null) {
+    if (!tag) {
+      selectedTags = [];
+    } else {
+      if (selectedTags.includes(tag)) {
+        selectedTags = selectedTags.filter(t => t !== tag);
+      } else {
+        selectedTags = [...selectedTags, tag];
+      }
+    }
+    applyFilters();
+  }
+
+  function initBlogEvents() {
+    selectedTags = [];
+    applyFilters();
+
+    // Use event delegation on the tag container to avoid duplicate listeners
+    const tagContainer = document.getElementById("tag-container");
+    if (tagContainer) {
+      tagContainer.addEventListener("click", (e) => {
+        const btn = (e.target as Element).closest("button");
+        if (!btn) return;
+        if (btn.id === "all-tags-btn") {
+          toggleTag(null);
+        } else {
+          toggleTag(btn.getAttribute("data-tag"));
+        }
+      });
+    }
+
+    const clearBtn = document.getElementById("clear-filters-btn");
+    if (clearBtn) clearBtn.onclick = () => toggleTag(null);
+
+    const resetNoPosts = document.getElementById("reset-no-posts");
+    if (resetNoPosts) resetNoPosts.onclick = () => toggleTag(null);
+  }
+
+  document.addEventListener("astro:page-load", initBlogEvents);
+</script>
