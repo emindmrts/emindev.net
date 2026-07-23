@@ -139,7 +139,7 @@ const techStack = [
                   </svg>
                 </div>
                 <!-- Vinyl record peeking out -->
-                <div id="np-vinyl-wrapper" class="absolute top-0.5 left-0.5 size-9 z-20 hidden cursor-grab active:cursor-grabbing" style="touch-action: none;">
+                <div id="np-vinyl-wrapper" class="absolute top-0.5 left-0.5 size-9 z-0 hidden cursor-grab active:cursor-grabbing" style="touch-action: none;">
                   <img id="np-vinyl" src={vinylImg.src} alt="Vinyl" class="size-full rounded-full object-contain pointer-events-none select-none" draggable="false" />
                 </div>
               </div>
@@ -304,19 +304,45 @@ const techStack = [
 
     let intervalId = null;
 
+    let fadeInterval = null;
+
     function handleMouseEnter() {
       const audio = document.getElementById("np-audio");
-      if (audio && audio.src) {
-        audio.volume = 0.5; // Soft volume for background
-        audio.play().catch(e => console.log("Autoplay prevented:", e));
-      }
+      if (!audio || !audio.src) return;
+      
+      // Cancel any ongoing fade-out
+      if (fadeInterval) { clearInterval(fadeInterval); fadeInterval = null; }
+      
+      audio.volume = 0;
+      audio.play().then(() => {
+        // Fade in over ~400ms
+        let vol = 0;
+        const step = 0.05;
+        const interval = setInterval(() => {
+          vol = Math.min(0.5, vol + step);
+          audio.volume = vol;
+          if (vol >= 0.5) clearInterval(interval);
+        }, 40);
+      }).catch(e => console.log("Autoplay prevented:", e));
     }
 
     function handleMouseLeave() {
       const audio = document.getElementById("np-audio");
-      if (audio) {
-        audio.pause();
-      }
+      if (!audio || audio.paused) return;
+      
+      // Fade out over ~800ms
+      if (fadeInterval) clearInterval(fadeInterval);
+      let vol = audio.volume;
+      fadeInterval = setInterval(() => {
+        vol = Math.max(0, vol - 0.025);
+        audio.volume = vol;
+        if (vol <= 0) {
+          clearInterval(fadeInterval);
+          fadeInterval = null;
+          audio.pause();
+          audio.volume = 0.5; // reset for next play
+        }
+      }, 25);
     }
 
     let vinylState = {
