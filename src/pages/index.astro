@@ -304,57 +304,61 @@ const techStack = [
 
     let intervalId = null;
 
-    let fadeInterval = null;
-    let isHovering = false;
+    let fadeRAF = null;
+    let fadeTarget = 0; // 0 = silent, 0.5 = playing
+
+    function audioFadeTick() {
+      const audio = document.getElementById("np-audio");
+      if (!audio) return;
+
+      const diff = fadeTarget - audio.volume;
+      
+      if (Math.abs(diff) < 0.01) {
+        // Reached target
+        audio.volume = fadeTarget;
+        if (fadeTarget === 0 && !audio.paused) {
+          audio.pause();
+        }
+        fadeRAF = null;
+        return;
+      }
+
+      // Fade speed: faster fade-in, slower fade-out
+      const speed = fadeTarget > audio.volume ? 0.04 : 0.015;
+      audio.volume = Math.max(0, Math.min(1, audio.volume + Math.sign(diff) * speed));
+      
+      fadeRAF = requestAnimationFrame(audioFadeTick);
+    }
+
+    function startFade(target) {
+      fadeTarget = target;
+      if (!fadeRAF) {
+        fadeRAF = requestAnimationFrame(audioFadeTick);
+      }
+    }
 
     function handleMouseEnter() {
-      isHovering = true;
       const audio = document.getElementById("np-audio");
       if (!audio) return;
       
       const hasSrc = audio.src && audio.src !== "" && audio.src !== window.location.href;
       if (!hasSrc) return;
-      
-      // Cancel any ongoing fade-out
-      if (fadeInterval) { clearInterval(fadeInterval); fadeInterval = null; }
-      
-      // Start playing at 0 volume, then fade in
-      audio.volume = 0;
-      const playPromise = audio.play();
-      if (playPromise) {
-        playPromise.then(() => {
-          if (!isHovering) { audio.pause(); return; }
-          let vol = 0;
-          fadeInterval = setInterval(() => {
-            vol = Math.min(0.5, vol + 0.05);
-            audio.volume = vol;
-            if (vol >= 0.5) { clearInterval(fadeInterval); fadeInterval = null; }
-          }, 30);
+
+      if (audio.paused) {
+        audio.volume = 0;
+        audio.play().then(() => {
+          startFade(0.5);
         }).catch(e => console.log("Autoplay prevented:", e));
+      } else {
+        // Already playing (maybe mid-fade-out), just fade back up
+        startFade(0.5);
       }
     }
 
     function handleMouseLeave() {
-      isHovering = false;
       const audio = document.getElementById("np-audio");
       if (!audio || audio.paused) return;
-      
-      // Fade out smoothly
-      if (fadeInterval) { clearInterval(fadeInterval); fadeInterval = null; }
-      
-      fadeInterval = setInterval(() => {
-        let vol = audio.volume - 0.02;
-        if (vol <= 0) {
-          vol = 0;
-          audio.volume = vol;
-          audio.pause();
-          audio.volume = 0.5;
-          clearInterval(fadeInterval);
-          fadeInterval = null;
-        } else {
-          audio.volume = vol;
-        }
-      }, 20);
+      startFade(0);
     }
 
     let vinylState = {
