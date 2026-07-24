@@ -8,6 +8,7 @@ export default defineConfig({
   title: "Astro Micro",
   projectId: "3k9hzpz8",
   dataset: "production",
+  basePath: "/admin",
   plugins: [structureTool(), codeInput()],
   schema: { types: schemaTypes },
 });
