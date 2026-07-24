@@ -31,7 +31,7 @@ export interface BlockContent {
 }
 
 const config: ClientConfig = {
-  projectId: import.meta.env.SANITY_PROJECT_ID || "",
+  projectId: import.meta.env.SANITY_PROJECT_ID || "3k9hzpz8",
   dataset: import.meta.env.SANITY_DATASET || "production",
   apiVersion: import.meta.env.SANITY_API_VERSION || "2024-01-01",
   useCdn: import.meta.env.PROD,
