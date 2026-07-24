@@ -41,11 +41,11 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
     <aside data-pagefind-ignore>
       <div class="space-y-10">
         
-        <!-- Kategori Filtreleri -->
+        <!-- Category Filters -->
         <section class="animate space-y-4">
           <div class="flex items-center justify-between">
             <h2 class="text-xs font-semibold uppercase tracking-wider text-ghost">
-              kategoriler
+              categories
             </h2>
             <button
               id="clear-filters-btn"
@@ -53,7 +53,7 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
               class="text-xs transition-colors hover:underline hidden cursor-pointer"
               style="color: #60a5fa;"
             >
-              Filtreleri Temizle
+              Clear Filters
             </button>
           </div>
 
@@ -64,7 +64,7 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
               class="px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 cursor-pointer mi-tag-bounce"
               style="background-color: rgba(59, 130, 246, 0.25); color: #60a5fa; border-color: rgba(96, 165, 250, 0.5);"
             >
-              tümü ({publishedPosts.length})
+              all ({publishedPosts.length})
             </button>
 
             {
@@ -85,14 +85,14 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
           </div>
         </section>
 
-        <!-- Yazı Listesi (Yıla Göre) -->
+        <!-- Post List (by Year) -->
         <section class="animate space-y-8">
           <div class="flex items-center justify-between pb-2 border-b border-white/5">
             <h2 id="section-title" class="text-xs font-semibold uppercase tracking-wider text-ghost">
-              tüm yazılar
+              all posts
             </h2>
             <span id="section-count" class="text-xs text-ghost">
-              {publishedPosts.length} yazı
+              {publishedPosts.length} posts
             </span>
           </div>
 
@@ -114,9 +114,9 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
           </div>
 
           <div id="no-posts-msg" class="py-8 text-center hidden text-faint">
-            <p>Bu kategoride yazı bulunamadı.</p>
+            <p>No posts found in this category.</p>
             <button id="reset-no-posts" type="button" class="mt-2 inline-block text-xs text-blue-400 hover:underline cursor-pointer">
-              Tüm yazılara dön
+              Show all posts
             </button>
           </div>
         </section>
@@ -181,8 +181,8 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
       group.style.display = hasPosts ? "" : "none";
     });
 
-    if (sectionTitle) sectionTitle.textContent = selectedTags.length > 0 ? `${selectedTags.join(", ")} yazıları` : "tüm yazılar";
-    if (sectionCount) sectionCount.textContent = `${visibleCount} yazı`;
+    if (sectionTitle) sectionTitle.textContent = selectedTags.length > 0 ? `${selectedTags.join(", ")} posts` : "all posts";
+    if (sectionCount) sectionCount.textContent = `${visibleCount} posts`;
     if (noPostsMsg) noPostsMsg.style.display = visibleCount === 0 ? "" : "none";
   }
 
