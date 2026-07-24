@@ -105,7 +105,7 @@
   }
 
   main {
-    @apply flex-1 py-32;
+    @apply flex-1 py-20 md:py-32;
   }
 
   footer {
@@ -239,6 +239,13 @@ pre {
   filter: blur(100px);
   pointer-events: none;
   z-index: -1;
+}
+
+@media (max-width: 768px) {
+  .ambient-glow-left,
+  .ambient-glow-right {
+    display: none;
+  }
 }
 
 /* ═══════════════════════════════════════

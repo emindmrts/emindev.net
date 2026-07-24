@@ -7,7 +7,7 @@ type NavPost = {
 const { prevPost, nextPost } = Astro.props as { prevPost: NavPost; nextPost: NavPost };
 ---
 
-<div class="grid grid-cols-2 gap-1.5 sm:gap-3">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-3">
   {
     prevPost ? (
       <a
