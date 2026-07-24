@@ -151,7 +151,15 @@ html.scrolled #back-to-top {
 
 /* shiki config */
 pre {
-  @apply border border-white/8 py-5;
+  @apply border border-white/8 py-5 overflow-x-auto;
+}
+
+code {
+  @apply text-[13px] sm:text-sm;
+}
+
+pre code {
+  @apply text-[12px] sm:text-[13px];
 }
 
 :root {
@@ -367,6 +375,9 @@ pre {
   #now-playing-widget:hover #np-info {
     transform: none;
   }
+  #np-vinyl.is-dragging {
+    animation: none;
+  }
 }
 
 /* Now Playing — vinyl peek on hover */
@@ -379,18 +390,20 @@ pre {
   transition: transform 400ms ease-in;
 }
 
-#now-playing-widget:hover #np-vinyl-wrapper {
-  transform: translateX(14px);
-  transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+@media (hover: hover) {
+  #now-playing-widget:hover #np-vinyl-wrapper {
+    transform: translateX(14px);
+    transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
 
-#now-playing-widget:hover #np-info {
-  transform: translateX(10px);
-  transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+  #now-playing-widget:hover #np-info {
+    transform: translateX(10px);
+    transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
 
-#now-playing-widget:hover #np-vinyl {
-  animation: cover-spin 3s linear infinite;
+  #now-playing-widget:hover #np-vinyl {
+    animation: cover-spin 3s linear infinite;
+  }
 }
 
 #np-vinyl.is-dragging {

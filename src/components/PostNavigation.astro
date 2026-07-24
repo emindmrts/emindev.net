@@ -31,7 +31,7 @@ const { prevPost, nextPost } = Astro.props as { prevPost: NavPost; nextPost: Nav
             class="translate-x-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0 group-focus-visible:translate-x-0"
           />
         </svg>
-        <div class="flex items-center text-sm">{prevPost.title}</div>
+        <div class="flex items-center text-sm truncate">{prevPost.title}</div>
       </a>
     ) : (
       <div class="invisible" />
@@ -61,7 +61,7 @@ const { prevPost, nextPost } = Astro.props as { prevPost: NavPost; nextPost: Nav
             class="-translate-x-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0 group-focus-visible:translate-x-0"
           />
         </svg>
-        <div class="flex items-center text-sm">{nextPost.title}</div>
+        <div class="flex items-center text-sm truncate">{nextPost.title}</div>
       </a>
     ) : (
       <div class="invisible" />
