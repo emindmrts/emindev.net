@@ -31,8 +31,8 @@ pnpm-debug.log*
 # Tina CMS generated files
 tina/__generated__/
 
-# Tina admin build
-public/admin/
+# Sanity Studio build (committed for Vercel)
+
 
 # Sanity CLI cache
 .sanity/
