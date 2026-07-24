@@ -1,5 +1,4 @@
 ---
-import { getPayloadCollection } from "@lib/payload";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import FormattedDate from "@components/FormattedDate.astro";
@@ -8,50 +7,62 @@ import BackToPrevious from "@components/BackToPrevious.astro";
 import PostNavigation from "@components/PostNavigation.astro";
 import TableOfContents from "@components/TableOfContents.astro";
 import Giscus from "@components/Giscus.astro";
+import { PT } from "@components/PortableText";
+import { client, blogPostsAllQuery, blogPostQuery } from "@lib/sanity";
 
 export async function getStaticPaths() {
-  const posts = (await getPayloadCollection("blog"))
-    .filter((post) => !post.data.draft)
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-  return posts.map((post) => ({
-    params: { id: post.id },
-    props: { post },
-  }));
+  const posts = await client.fetch(blogPostsAllQuery);
+  return posts
+    .filter((post) => !post.draft)
+    .map((post) => ({
+      params: { id: post.slug },
+    }));
 }
-type Props = { post: any };
 
-const { post } = Astro.props;
-const posts = (await getPayloadCollection("blog"))
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const { id } = Astro.params;
+if (!id) throw new Error("Missing id param");
+
+const post = await client.fetch(blogPostQuery, { slug: id });
+if (!post) throw new Error(`Blog entry not found: ${id}`);
+
+const allPosts = await client.fetch(blogPostsAllQuery);
+const publishedPosts = allPosts.filter((p) => !p.draft);
 
 function getNextPost() {
-  let postIndex;
-  for (const p of posts) {
-    if (p.id === post.id) {
-      postIndex = posts.indexOf(p);
-      return posts[postIndex - 1];
-    }
-  }
+  const idx = publishedPosts.findIndex((p) => p.slug === id);
+  return publishedPosts[idx - 1];
 }
 
 function getPrevPost() {
-  let postIndex;
-  for (const p of posts) {
-    if (p.id === post.id) {
-      postIndex = posts.indexOf(p);
-      return posts[postIndex + 1];
-    }
-  }
+  const idx = publishedPosts.findIndex((p) => p.slug === id);
+  return publishedPosts[idx + 1];
 }
 
 const nextPost = getNextPost();
 const prevPost = getPrevPost();
 
-const { Content, headings } = await post.render();
+function extractHeadings(content: unknown[]): Array<{ depth: number; id: string; text: string }> {
+  const headings: Array<{ depth: number; id: string; text: string }> = [];
+  if (!Array.isArray(content)) return headings;
+  for (const block of content) {
+    if (block?._type === "block") {
+      const style = block.style || "normal";
+      const depth = style === "h2" ? 1 : style === "h3" ? 2 : style === "h4" ? 3 : 0;
+      if (depth > 0) {
+        const text = block.children?.map((c: { text?: string }) => c.text || "").join("") || "";
+        const id = `h-${block._key}`;
+        headings.push({ depth, id, text });
+      }
+    }
+  }
+  return headings;
+}
+
+const headings = extractHeadings(post.content || []);
+const bodyText = post.content ? JSON.stringify(post.content) : "";
 ---
 
-<Layout title={post.data.title} description={post.data.description}>
+<Layout title={post.title} description={post.description}>
   <Container>
     <div class="animate">
       <BackToPrevious href="/blog">Back to blog</BackToPrevious>
@@ -59,22 +70,20 @@ const { Content, headings } = await post.render();
     <div class="my-10 space-y-1">
       <div class="animate flex items-center gap-1.5">
         <div class="font-base text-sm">
-          <FormattedDate date={post.data.date} />
+          <FormattedDate date={new Date(post.date)} />
         </div>
         &bull;
-        {post.body && (
-          <div class="font-base text-sm">
-            {readingTime(post.body)}
-          </div>
-        )}        
+        <div class="font-base text-sm">
+          {readingTime(bodyText)}
+        </div>
       </div>
       <h1 class="animate text-3xl font-semibold text-black dark:text-white">
-        {post.data.title}
+        {post.title}
       </h1>
       {
-        post.data.tags && post.data.tags?.length > 0 ? (
+        post.tags && post.tags?.length > 0 ? (
           <div class="animate flex gap-2 pt-1">
-            {post.data.tags.map((tag: string) => (
+            {post.tags.map((tag: string) => (
               <a
                 href={`/tags/${tag}`}
                 class="rounded-sm border border-black/15 px-2 py-1 text-sm transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
@@ -88,7 +97,7 @@ const { Content, headings } = await post.render();
     </div>
     {headings.length > 0 && <TableOfContents headings={headings} />}
     <article class="animate">
-      <Content />
+      {post.content && <PT value={post.content} />}
       <div class="mt-24">
         <PostNavigation prevPost={prevPost} nextPost={nextPost} />
       </div>

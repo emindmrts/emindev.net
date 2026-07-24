@@ -1,34 +1,30 @@
 ---
 type Props = {
   entry: {
-    id: string;
+    title: string;
     slug: string;
-    collection?: string;
-    data: {
-      title: string;
-      description: string;
-      date: Date;
-      tags?: string[];
-      draft?: boolean;
-      demoURL?: string;
-      repoURL?: string;
-    };
+    description: string;
+    date: string;
+    tags?: string[];
+    demoURL?: string;
+    repoURL?: string;
   };
+  collection: string;
 };
 
-const { entry } = Astro.props;
+const { entry, collection } = Astro.props;
 ---
 
 <a
-  href={`/${entry.collection}/${entry.id}`}
+  href={`/${collection}/${entry.slug}`}
   class="not-prose group relative flex flex-nowrap rounded-md border border-white/8 px-4 py-3 pr-10 transition-colors duration-300 ease-in-out hover:bg-white/5 hover:text-white focus-visible:bg-white/5 focus-visible:text-white mi-scale mi-glow"
 >
   <div class="flex flex-1 flex-col truncate">
     <div class="font-semibold text-white/90">
-      {entry.data.title}
+      {entry.title}
     </div>
     <div class="text-sm text-white/50">
-      {entry.data.description}
+      {entry.description}
     </div>
   </div>
   <svg

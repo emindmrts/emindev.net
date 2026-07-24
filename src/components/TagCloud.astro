@@ -1,10 +1,8 @@
 ---
-import { getPayloadCollection } from "@lib/payload";
+import { client, blogPostsAllQuery } from "@lib/sanity";
 
-const allPosts = await getPayloadCollection("blog");
-const allTags = allPosts.map((tag) => tag.data.tags).flat();
-
-console.log(allTags);
+const allPosts = await client.fetch(blogPostsAllQuery);
+const allTags = allPosts.flatMap((post) => post.tags || []);
 ---
 
 <span> </span>

@@ -1,17 +1,15 @@
 ---
-import { getPayloadCollection } from "@lib/payload";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import { BLOG } from "@consts";
+import { client, blogPostsAllQuery } from "@lib/sanity";
 
-const allPosts = (await getPayloadCollection("blog"))
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const allPosts = await client.fetch(blogPostsAllQuery);
+const publishedPosts = allPosts.filter((post) => !post.draft);
 
-// Tüm etiketleri ve her etiketteki yazı sayılarını hesapla
-const tagCounts = allPosts.reduce((acc, post) => {
-  (post.data.tags || []).forEach((tag) => {
+const tagCounts = publishedPosts.reduce((acc, post) => {
+  (post.tags || []).forEach((tag) => {
     acc[tag] = (acc[tag] || 0) + 1;
   });
   return acc;
@@ -19,13 +17,12 @@ const tagCounts = allPosts.reduce((acc, post) => {
 
 const allTags = Object.keys(tagCounts).sort();
 
-// Yıllara göre tüm yazıları grupla
 type Acc = {
-  [year: string]: typeof allPosts;
+  [year: string]: typeof publishedPosts;
 };
 
-const postsByYear = allPosts.reduce((acc: Acc, post) => {
-  const year = post.data.date.getFullYear().toString();
+const postsByYear = publishedPosts.reduce((acc: Acc, post) => {
+  const year = new Date(post.date).getFullYear().toString();
   if (!acc[year]) {
     acc[year] = [];
   }
@@ -61,17 +58,15 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
           </div>
 
           <div id="tag-container" class="flex flex-wrap gap-2">
-            <!-- Tümü Button -->
             <button
               id="all-tags-btn"
               type="button"
               class="px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 cursor-pointer mi-tag-bounce"
               style="background-color: rgba(59, 130, 246, 0.25); color: #60a5fa; border-color: rgba(96, 165, 250, 0.5);"
             >
-              tümü ({allPosts.length})
+              tümü ({publishedPosts.length})
             </button>
 
-            <!-- Tag Buttons -->
             {
               allTags.map((tag) => {
                 const count = tagCounts[tag];
@@ -97,7 +92,7 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
               tüm yazılar
             </h2>
             <span id="section-count" class="text-xs text-ghost">
-              {allPosts.length} yazı
+              {publishedPosts.length} yazı
             </span>
           </div>
 
@@ -109,8 +104,8 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
                 </div>
                 <ul class="not-prose flex flex-col gap-3">
                   {postsByYear[year].map((post) => (
-                    <li class="post-item" data-tags={JSON.stringify(post.data.tags || [])}>
-                      <ArrowCard entry={post} />
+                    <li class="post-item" data-tags={JSON.stringify(post.tags || [])}>
+                      <ArrowCard entry={post} collection="blog" />
                     </li>
                   ))}
                 </ul>
@@ -132,7 +127,6 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
 </Layout>
 
 <script>
-  // State
   let selectedTags: string[] = [];
 
   function applyFilters() {
@@ -152,18 +146,15 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
     const INACTIVE_COLOR = "rgba(236,234,230,0.65)";
     const INACTIVE_BORDER = "rgba(255,255,255,0.1)";
 
-    // All button
     if (allBtn) {
       const active = selectedTags.length === 0;
       allBtn.style.cssText = `background-color:${active ? ACTIVE_BG : INACTIVE_BG};color:${active ? ACTIVE_COLOR : INACTIVE_COLOR};border-color:${active ? ACTIVE_BORDER : INACTIVE_BORDER};font-weight:${active ? "600" : "500"};`;
     }
 
-    // Clear button
     if (clearBtn) {
       clearBtn.style.display = selectedTags.length > 0 ? "" : "none";
     }
 
-    // Category buttons
     categoryBtns.forEach((btn) => {
       const tag = btn.getAttribute("data-tag") || "";
       const active = selectedTags.includes(tag);
@@ -171,7 +162,6 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
       btn.setAttribute("aria-pressed", String(active));
     });
 
-    // Filter posts
     let visibleCount = 0;
     postItems.forEach((item) => {
       let tags: string[] = [];
@@ -186,7 +176,6 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
       }
     });
 
-    // Hide empty year groups
     yearGroups.forEach((group) => {
       const hasPosts = Array.from(group.querySelectorAll<HTMLElement>(".post-item")).some(p => p.style.display !== "none");
       group.style.display = hasPosts ? "" : "none";
@@ -214,7 +203,6 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
     selectedTags = [];
     applyFilters();
 
-    // Use event delegation on the tag container to avoid duplicate listeners
     const tagContainer = document.getElementById("tag-container");
     if (tagContainer) {
       tagContainer.addEventListener("click", (e) => {

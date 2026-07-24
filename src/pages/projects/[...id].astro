@@ -1,5 +1,4 @@
 ---
-import { getPayloadCollection } from "@lib/payload";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import FormattedDate from "@components/FormattedDate.astro";
@@ -7,23 +6,46 @@ import { readingTime } from "@lib/utils";
 import BackToPrevious from "@components/BackToPrevious.astro";
 import Link from "@components/Link.astro";
 import TableOfContents from "@components/TableOfContents.astro";
+import { PT } from "@components/PortableText";
+import { client, projectsAllQuery, projectQuery } from "@lib/sanity";
 
 export async function getStaticPaths() {
-  const projects = (await getPayloadCollection("projects"))
-    .filter((post) => !post.data.draft)
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-  return projects.map((project) => ({
-    params: { id: project.id },
-    props: { project },
-  }));
+  const projects = await client.fetch(projectsAllQuery);
+  return projects
+    .filter((p) => !p.draft)
+    .map((project) => ({
+      params: { id: project.slug },
+    }));
 }
-type Props = { project: any };
 
-const { project } = Astro.props;
-const { Content, headings } = await project.render();
+const { id } = Astro.params;
+if (!id) throw new Error("Missing id param");
+
+const project = await client.fetch(projectQuery, { slug: id });
+if (!project) throw new Error(`Project not found: ${id}`);
+
+function extractHeadings(content: unknown[]): Array<{ depth: number; id: string; text: string }> {
+  const headings: Array<{ depth: number; id: string; text: string }> = [];
+  if (!Array.isArray(content)) return headings;
+  for (const block of content) {
+    if (block?._type === "block") {
+      const style = block.style || "normal";
+      const depth = style === "h2" ? 1 : style === "h3" ? 2 : style === "h4" ? 3 : 0;
+      if (depth > 0) {
+        const text = block.children?.map((c: { text?: string }) => c.text || "").join("") || "";
+        const id = `h-${block._key}`;
+        headings.push({ depth, id, text });
+      }
+    }
+  }
+  return headings;
+}
+
+const headings = extractHeadings(project.content || []);
+const bodyText = project.content ? JSON.stringify(project.content) : "";
 ---
 
-<Layout title={project.data.title} description={project.data.description}>
+<Layout title={project.title} description={project.description}>
   <Container>
     <div class="animate">
       <BackToPrevious href="/projects">Back to projects</BackToPrevious>
@@ -31,29 +53,27 @@ const { Content, headings } = await project.render();
     <div class="animate my-10 space-y-1">
       <div class="flex items-center gap-1.5">
         <div class="font-base text-sm">
-          <FormattedDate date={project.data.date} />
+          <FormattedDate date={new Date(project.date)} />
         </div>
         &bull;
-        {project.body && (
-          <div class="font-base text-sm">
-            {readingTime(project.body)}
-          </div>
-        )}     
+        <div class="font-base text-sm">
+          {readingTime(bodyText)}
+        </div>
       </div>
       <h1 class="text-3xl font-semibold text-black dark:text-white">
-        {project.data.title}
+        {project.title}
       </h1>
       {
-        (project.data.demoURL || project.data.repoURL) && (
+        (project.demoURL || project.repoURL) && (
           <nav class="flex gap-1">
-            {project.data.demoURL && (
-              <Link href={project.data.demoURL} external>
+            {project.demoURL && (
+              <Link href={project.demoURL} external>
                 demo
               </Link>
             )}
-            {project.data.demoURL && project.data.repoURL && <span>/</span>}
-            {project.data.repoURL && (
-              <Link href={project.data.repoURL} external>
+            {project.demoURL && project.repoURL && <span>/</span>}
+            {project.repoURL && (
+              <Link href={project.repoURL} external>
                 repo
               </Link>
             )}
@@ -61,9 +81,9 @@ const { Content, headings } = await project.render();
         )
       }
     </div>
-    <TableOfContents headings={headings} />
+    {headings.length > 0 && <TableOfContents headings={headings} />}
     <article class="animate">
-      <Content />
+      {project.content && <PT value={project.content} />}
     </article>
   </Container>
 </Layout>

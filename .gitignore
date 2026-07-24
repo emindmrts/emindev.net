@@ -27,3 +27,15 @@ pnpm-debug.log*
 # database files
 *.db
 *.db-journal
+
+# Tina CMS generated files
+tina/__generated__/
+
+# Tina admin build
+public/admin/
+
+# Sanity CLI cache
+.sanity/
+
+# Temp scripts
+find-cjs*.mjs

@@ -4,20 +4,13 @@ import HomeContainer from "@components/HomeContainer.astro";
 import { SITE, HOME, SOCIALS } from "@consts";
 import ArrowCard from "@components/ArrowCard.astro";
 import Link from "@components/Link.astro";
-import { getPayloadCollection } from "@lib/payload";
+import { client, blogPostsQuery, projectsQuery } from "@lib/sanity";
 import vinylImg from "@assets/vinyl.png";
 
-const blog = (await getPayloadCollection("blog"))
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
-
-const projects = (
-  await getPayloadCollection("projects")
-)
-  .filter((project) => !project.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
+const blog = await client.fetch(blogPostsQuery);
+const projects = await client.fetch(projectsQuery);
+const displayedPosts = blog.slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
+const displayedProjects = projects.slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
 
 const techStack = [
   { name: "TypeScript", icon: "typescript" },
@@ -91,9 +84,9 @@ const techStack = [
             </div>
             <ul class="not-prose flex flex-col gap-4">
               {
-                blog.map((post) => (
+                displayedPosts.map((post) => (
                   <li>
-                    <ArrowCard entry={post} />
+                    <ArrowCard entry={post} collection="blog" />
                   </li>
                 ))
               }
@@ -109,9 +102,9 @@ const techStack = [
             </div>
             <ul class="not-prose flex flex-col gap-4">
               {
-                projects.map((project) => (
+                displayedProjects.map((project) => (
                   <li>
-                    <ArrowCard entry={project} />
+                    <ArrowCard entry={project} collection="projects" />
                   </li>
                 ))
               }
@@ -304,7 +297,7 @@ const techStack = [
     let intervalId = null;
 
     let fadeRAF = null;
-    let fadeTarget = 0; // 0 = silent, 0.5 = playing
+    let fadeTarget = 0;
 
     function audioFadeTick() {
       const audio = document.getElementById("np-audio");
@@ -313,7 +306,6 @@ const techStack = [
       const diff = fadeTarget - audio.volume;
       
       if (Math.abs(diff) < 0.01) {
-        // Reached target
         audio.volume = fadeTarget;
         if (fadeTarget === 0 && !audio.paused) {
           audio.pause();
@@ -322,7 +314,6 @@ const techStack = [
         return;
       }
 
-      // Fade speed: faster fade-in, slower fade-out
       const speed = fadeTarget > audio.volume ? 0.04 : 0.015;
       audio.volume = Math.max(0, Math.min(1, audio.volume + Math.sign(diff) * speed));
       
@@ -349,7 +340,6 @@ const techStack = [
           startFade(0.5);
         }).catch(e => console.log("Autoplay prevented:", e));
       } else {
-        // Already playing (maybe mid-fade-out), just fade back up
         startFade(0.5);
       }
     }
@@ -387,7 +377,6 @@ const techStack = [
       let currentRate = 1.0;
       let loopId = null;
 
-      // Open Spotify only when clicking the text/info area, not the vinyl
       if (npInfo) {
         npInfo.addEventListener("click", () => {
           const href = widget?.getAttribute("data-href");
@@ -427,27 +416,22 @@ const techStack = [
         const now = performance.now();
         
         let delta = angle - vinylState.lastPointerAngle;
-        // Normalize to [-PI, PI]
         if (delta > Math.PI) delta -= 2 * Math.PI;
         if (delta < -Math.PI) delta += 2 * Math.PI;
 
-        const dt = (now - vinylState.lastTime) / 1000; // seconds
+        const dt = (now - vinylState.lastTime) / 1000;
         
         if (dt > 0) {
           const deltaDeg = delta * (180 / Math.PI);
           vinylState.currentAngle += deltaDeg;
           vinyl.style.transform = `rotate(${vinylState.currentAngle}deg)`;
           
-          // Smooth the velocity with exponential moving average
-          const instantVelocity = delta / dt; // rad/s
+          const instantVelocity = delta / dt;
           vinylState.angularVelocity = vinylState.angularVelocity * 0.6 + instantVelocity * 0.4;
           
-          // Map angular velocity to playback rate
-          // Normal CSS animation is 3s per 360deg = ~2.1 rad/s -> maps to 1.0x speed
           const expectedNormalSpeed = 2.1;
           let newRate = Math.abs(vinylState.angularVelocity / expectedNormalSpeed);
           
-          // Clamp between 0.1 and 4.0
           currentRate = Math.max(0.1, Math.min(4.0, newRate));
           
           if (!audio.paused) {
@@ -462,22 +446,17 @@ const techStack = [
       function inertiaLoop() {
         if (vinylState.isDragging) return;
         
-        // Decay angular velocity
         vinylState.angularVelocity *= 0.96;
-        
-        // Smoothly return playback rate to 1.0
         currentRate += (1.0 - currentRate) * 0.05;
         
         if (audio && !audio.paused) {
           audio.playbackRate = Math.max(0.25, Math.min(4.0, currentRate));
         }
 
-        // Keep spinning visually based on remaining velocity
         const degPerFrame = vinylState.angularVelocity * (180 / Math.PI) * (1/60);
-        vinylState.currentAngle += degPerFrame + 1.5; // 1.5 = base spin
+        vinylState.currentAngle += degPerFrame + 1.5;
         vinyl.style.transform = `rotate(${vinylState.currentAngle}deg)`;
 
-        // Stop when settled
         if (Math.abs(currentRate - 1.0) < 0.005 && Math.abs(vinylState.angularVelocity) < 0.1) {
           if (audio && !audio.paused) audio.playbackRate = 1.0;
           currentRate = 1.0;
@@ -495,7 +474,6 @@ const techStack = [
         vinylState.isDragging = false;
         vinylWrap.releasePointerCapture(e.pointerId);
         
-        // Start smooth deceleration loop
         if (!loopId) loopId = requestAnimationFrame(inertiaLoop);
       }
 

@@ -1,16 +1,16 @@
 import rss from "@astrojs/rss";
 import { SITE } from "@consts";
-import { getCollection } from "astro:content";
+import { client, blogPostsAllQuery, projectsAllQuery } from "@lib/sanity";
 
 export async function GET(context) {
-  const blog = (await getCollection("blog")).filter((post) => !post.data.draft);
-
-  const projects = (await getCollection("projects")).filter(
-    (project) => !project.data.draft,
+  const blog = (await client.fetch(blogPostsAllQuery)).filter(
+    (post) => !post.draft,
   );
-
+  const projects = (await client.fetch(projectsAllQuery)).filter(
+    (project) => !project.draft,
+  );
   const items = [...blog, ...projects].sort(
-    (a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf(),
+    (a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf(),
   );
 
   return rss({
@@ -18,10 +18,10 @@ export async function GET(context) {
     description: SITE.DESCRIPTION,
     site: context.site,
     items: items.map((item) => ({
-      title: item.data.title,
-      description: item.data.description,
-      pubDate: item.data.date,
-      link: `/${item.collection}/${item.id}/`,
+      title: item.title,
+      description: item.description,
+      pubDate: new Date(item.date),
+      link: `/${item._type === "blog" ? "blog" : "projects"}/${item.slug}/`,
     })),
   });
 }
