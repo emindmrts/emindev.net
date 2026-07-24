@@ -12,6 +12,7 @@ export default defineConfig({
   integrations: [sitemap(), mdx(), pagefind(), react()],
   adapter: vercel({
     webAnalytics: { enabled: true },
+    runtime: "nodejs20.x",
   }),
   vite: {
     plugins: [tailwindcss()],
