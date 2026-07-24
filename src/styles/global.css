@@ -101,7 +101,7 @@
   }
 
   header {
-    @apply fixed left-0 right-0 top-0 z-50 py-4 border-b border-white/10 bg-[#0c0a08]/80 backdrop-blur-md transition-all duration-300;
+    @apply fixed left-0 right-0 top-0 z-50 py-3 sm:py-4 border-b border-white/10 bg-[#0c0a08]/80 backdrop-blur-md transition-all duration-300;
   }
 
   main {
@@ -116,6 +116,7 @@
     @apply prose prose-neutral max-w-full dark:prose-invert prose-img:mx-auto prose-img:my-auto;
     @apply prose-headings:font-semibold;
     @apply prose-headings:text-black dark:prose-headings:text-white;
+    @apply prose-h2:text-2xl sm:prose-h2:text-3xl prose-h3:text-xl sm:prose-h3:text-2xl;
   }
 }
 
