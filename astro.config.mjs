@@ -9,6 +9,7 @@ import react from "@astrojs/react";
 // https://astro.build/config
 export default defineConfig({
   site: "https://www.emindev.net/",
+  output: "server",
   integrations: [sitemap(), mdx(), pagefind(), react()],
   adapter: vercel({
     webAnalytics: { enabled: true },
