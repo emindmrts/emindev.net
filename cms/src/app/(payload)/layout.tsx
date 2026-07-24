@@ -4,7 +4,6 @@ import config from '@payload-config'
 import '@payloadcms/next/css'
 import type { ServerFunctionClient } from 'payload'
 import {
-  generatePayloadViewport,
   handleServerFunctions,
   RootLayout,
 } from '@payloadcms/next/layouts'
@@ -13,7 +12,10 @@ import React from 'react'
 import { importMap } from './admin/importMap.js'
 import './custom.scss'
 
-export const generateViewport = generatePayloadViewport
+export const generateViewport = () => ({
+  width: 'device-width',
+  initialScale: 1,
+})
 
 type Args = {
   children: React.ReactNode
