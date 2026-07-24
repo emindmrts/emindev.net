@@ -4,7 +4,7 @@ import HomeContainer from "@components/HomeContainer.astro";
 import { SITE, HOME, SOCIALS } from "@consts";
 import ArrowCard from "@components/ArrowCard.astro";
 import Link from "@components/Link.astro";
-import { client, blogPostsQuery, projectsQuery } from "@lib/sanity";
+import { client, blogPostsQuery, projectsQuery, type SanityPost, type SanityProject } from "@lib/sanity";
 import vinylImg from "@assets/vinyl.png";
 
 const blog = await client.fetch(blogPostsQuery);
@@ -84,7 +84,7 @@ const techStack = [
             </div>
             <ul class="not-prose flex flex-col gap-4">
               {
-                displayedPosts.map((post) => (
+                displayedPosts.map((post: SanityPost) => (
                   <li>
                     <ArrowCard entry={post} collection="blog" />
                   </li>
@@ -102,7 +102,7 @@ const techStack = [
             </div>
             <ul class="not-prose flex flex-col gap-4">
               {
-                displayedProjects.map((project) => (
+                displayedProjects.map((project: SanityProject) => (
                   <li>
                     <ArrowCard entry={project} collection="projects" />
                   </li>

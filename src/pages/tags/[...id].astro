@@ -3,13 +3,13 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import BackToPrevious from "@components/BackToPrevious.astro";
-import { client, blogPostsAllQuery } from "@lib/sanity";
+import { client, blogPostsAllQuery, type SanityPost } from "@lib/sanity";
 
 export async function getStaticPaths() {
   const allPosts = await client.fetch(blogPostsAllQuery);
-  const posts = allPosts.filter((post) => !post.draft);
-  const tags = [...new Set(posts.flatMap((post) => post.tags || []))];
-  return tags.map((tag) => ({
+  const posts = allPosts.filter((post: SanityPost) => !post.draft);
+  const tags = [...new Set(posts.flatMap((post: SanityPost) => post.tags || []))] as string[];
+  return tags.map((tag: string) => ({
     params: { id: tag },
     props: { tag },
   }));
@@ -20,8 +20,8 @@ const { tag } = Astro.props;
 
 const allPosts = await client.fetch(blogPostsAllQuery);
 const posts = allPosts
-  .filter((post) => !post.draft && post.tags?.includes(tag))
-  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  .filter((post: SanityPost) => !post.draft && post.tags?.includes(tag))
+  .sort((a: SanityPost, b: SanityPost) => new Date(b.date).getTime() - new Date(a.date).getTime());
 ---
 
 <Layout title={`Tag: ${id}`} description={`Posts with the tag: ${id}`}>
@@ -32,7 +32,7 @@ const posts = allPosts
         Posts tagged with "{id}"
       </h1>
       <ul class="animate flex flex-col gap-4">
-        {posts.map((post) => <ArrowCard entry={post} collection="blog" />)}
+        {posts.map((post: SanityPost) => <ArrowCard entry={post} collection="blog" />)}
       </ul>
     </div>
   </Container>

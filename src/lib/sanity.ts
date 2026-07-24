@@ -1,5 +1,35 @@
 import { createClient, type ClientConfig } from "@sanity/client";
 
+export interface SanityPost {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  date: string;
+  draft?: boolean;
+  tags?: string[];
+  content?: unknown[];
+}
+
+export interface SanityProject {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  date: string;
+  draft?: boolean;
+  demoURL?: string;
+  repoURL?: string;
+  content?: unknown[];
+}
+
+export interface BlockContent {
+  _type: string;
+  _key: string;
+  style?: string;
+  children?: Array<{ text?: string }>;
+}
+
 const config: ClientConfig = {
   projectId: import.meta.env.SANITY_PROJECT_ID || "",
   dataset: import.meta.env.SANITY_DATASET || "production",

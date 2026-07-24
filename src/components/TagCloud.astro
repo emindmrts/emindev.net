@@ -1,8 +1,1 @@
----
-import { client, blogPostsAllQuery } from "@lib/sanity";
-
-const allPosts = await client.fetch(blogPostsAllQuery);
-const allTags = allPosts.flatMap((post) => post.tags || []);
----
-
 <span> </span>

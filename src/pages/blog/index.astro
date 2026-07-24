@@ -3,13 +3,13 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import { BLOG } from "@consts";
-import { client, blogPostsAllQuery } from "@lib/sanity";
+import { client, blogPostsAllQuery, type SanityPost } from "@lib/sanity";
 
 const allPosts = await client.fetch(blogPostsAllQuery);
-const publishedPosts = allPosts.filter((post) => !post.draft);
+const publishedPosts = allPosts.filter((post: SanityPost) => !post.draft);
 
-const tagCounts = publishedPosts.reduce((acc, post) => {
-  (post.tags || []).forEach((tag) => {
+const tagCounts = publishedPosts.reduce((acc: Record<string, number>, post: SanityPost) => {
+  (post.tags || []).forEach((tag: string) => {
     acc[tag] = (acc[tag] || 0) + 1;
   });
   return acc;
@@ -21,7 +21,7 @@ type Acc = {
   [year: string]: typeof publishedPosts;
 };
 
-const postsByYear = publishedPosts.reduce((acc: Acc, post) => {
+const postsByYear = publishedPosts.reduce((acc: Acc, post: SanityPost) => {
   const year = new Date(post.date).getFullYear().toString();
   if (!acc[year]) {
     acc[year] = [];
@@ -103,7 +103,7 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
                   {year}
                 </div>
                 <ul class="not-prose flex flex-col gap-3">
-                  {postsByYear[year].map((post) => (
+                  {postsByYear[year].map((post: SanityPost) => (
                     <li class="post-item" data-tags={JSON.stringify(post.tags || [])}>
                       <ArrowCard entry={post} collection="blog" />
                     </li>

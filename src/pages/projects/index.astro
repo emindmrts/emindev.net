@@ -3,7 +3,7 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import { PROJECTS } from "@consts";
-import { client, projectsQuery } from "@lib/sanity";
+import { client, projectsQuery, type SanityProject } from "@lib/sanity";
 
 const projects = await client.fetch(projectsQuery);
 ---
@@ -17,7 +17,7 @@ const projects = await client.fetch(projectsQuery);
         </div>
         <ul class="animate not-prose flex flex-col gap-4">
           {
-            projects.map((project) => (
+            projects.map((project: SanityProject) => (
               <li>
                 <ArrowCard entry={project} collection="projects" />
               </li>

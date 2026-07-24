@@ -7,13 +7,13 @@ import BackToPrevious from "@components/BackToPrevious.astro";
 import Link from "@components/Link.astro";
 import TableOfContents from "@components/TableOfContents.astro";
 import { PT } from "@components/PortableText";
-import { client, projectsAllQuery, projectQuery } from "@lib/sanity";
+import { client, projectsAllQuery, projectQuery, type SanityProject, type BlockContent } from "@lib/sanity";
 
 export async function getStaticPaths() {
   const projects = await client.fetch(projectsAllQuery);
   return projects
-    .filter((p) => !p.draft)
-    .map((project) => ({
+    .filter((p: SanityProject) => !p.draft)
+    .map((project: SanityProject) => ({
       params: { id: project.slug },
     }));
 }
@@ -28,12 +28,13 @@ function extractHeadings(content: unknown[]): Array<{ depth: number; id: string;
   const headings: Array<{ depth: number; id: string; text: string }> = [];
   if (!Array.isArray(content)) return headings;
   for (const block of content) {
-    if (block?._type === "block") {
-      const style = block.style || "normal";
+    const b = block as BlockContent;
+    if (b._type === "block") {
+      const style = b.style || "normal";
       const depth = style === "h2" ? 1 : style === "h3" ? 2 : style === "h4" ? 3 : 0;
       if (depth > 0) {
-        const text = block.children?.map((c: { text?: string }) => c.text || "").join("") || "";
-        const id = `h-${block._key}`;
+        const text = b.children?.map((c: { text?: string }) => c.text || "").join("") || "";
+        const id = `h-${b._key}`;
         headings.push({ depth, id, text });
       }
     }

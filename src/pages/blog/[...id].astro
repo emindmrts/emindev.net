@@ -8,13 +8,13 @@ import PostNavigation from "@components/PostNavigation.astro";
 import TableOfContents from "@components/TableOfContents.astro";
 import Giscus from "@components/Giscus.astro";
 import { PT } from "@components/PortableText";
-import { client, blogPostsAllQuery, blogPostQuery } from "@lib/sanity";
+import { client, blogPostsAllQuery, blogPostQuery, type SanityPost, type BlockContent } from "@lib/sanity";
 
 export async function getStaticPaths() {
   const posts = await client.fetch(blogPostsAllQuery);
   return posts
-    .filter((post) => !post.draft)
-    .map((post) => ({
+    .filter((post: SanityPost) => !post.draft)
+    .map((post: SanityPost) => ({
       params: { id: post.slug },
     }));
 }
@@ -26,15 +26,15 @@ const post = await client.fetch(blogPostQuery, { slug: id });
 if (!post) throw new Error(`Blog entry not found: ${id}`);
 
 const allPosts = await client.fetch(blogPostsAllQuery);
-const publishedPosts = allPosts.filter((p) => !p.draft);
+const publishedPosts = allPosts.filter((p: SanityPost) => !p.draft);
 
 function getNextPost() {
-  const idx = publishedPosts.findIndex((p) => p.slug === id);
+  const idx = publishedPosts.findIndex((p: SanityPost) => p.slug === id);
   return publishedPosts[idx - 1];
 }
 
 function getPrevPost() {
-  const idx = publishedPosts.findIndex((p) => p.slug === id);
+  const idx = publishedPosts.findIndex((p: SanityPost) => p.slug === id);
   return publishedPosts[idx + 1];
 }
 
@@ -45,12 +45,13 @@ function extractHeadings(content: unknown[]): Array<{ depth: number; id: string;
   const headings: Array<{ depth: number; id: string; text: string }> = [];
   if (!Array.isArray(content)) return headings;
   for (const block of content) {
-    if (block?._type === "block") {
-      const style = block.style || "normal";
+    const b = block as BlockContent;
+    if (b._type === "block") {
+      const style = b.style || "normal";
       const depth = style === "h2" ? 1 : style === "h3" ? 2 : style === "h4" ? 3 : 0;
       if (depth > 0) {
-        const text = block.children?.map((c: { text?: string }) => c.text || "").join("") || "";
-        const id = `h-${block._key}`;
+        const text = b.children?.map((c: { text?: string }) => c.text || "").join("") || "";
+        const id = `h-${b._key}`;
         headings.push({ depth, id, text });
       }
     }
