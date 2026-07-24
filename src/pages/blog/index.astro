@@ -1,11 +1,11 @@
 ---
-import { getCollection } from "astro:content";
+import { getPayloadCollection } from "@lib/payload";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import { BLOG } from "@consts";
 
-const allPosts = (await getCollection("blog"))
+const allPosts = (await getPayloadCollection("blog"))
   .filter((post) => !post.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 

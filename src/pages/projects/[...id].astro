@@ -1,5 +1,5 @@
 ---
-import { type CollectionEntry, getCollection, render } from "astro:content";
+import { getPayloadCollection } from "@lib/payload";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import FormattedDate from "@components/FormattedDate.astro";
@@ -9,18 +9,18 @@ import Link from "@components/Link.astro";
 import TableOfContents from "@components/TableOfContents.astro";
 
 export async function getStaticPaths() {
-  const projects = (await getCollection("projects"))
+  const projects = (await getPayloadCollection("projects"))
     .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
   return projects.map((project) => ({
     params: { id: project.id },
-    props: project,
+    props: { project },
   }));
 }
-type Props = CollectionEntry<"projects">;
+type Props = { project: any };
 
-const project = Astro.props;
-const { Content, headings } = await render(project);
+const { project } = Astro.props;
+const { Content, headings } = await project.render();
 ---
 
 <Layout title={project.data.title} description={project.data.description}>

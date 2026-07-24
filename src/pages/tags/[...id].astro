@@ -1,12 +1,13 @@
 ---
-import { getCollection } from "astro:content";
+import { getPayloadCollection } from "@lib/payload";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import BackToPrevious from "@components/BackToPrevious.astro";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const allPosts = await getPayloadCollection("blog");
+  const posts = allPosts.filter((post) => !post.data.draft);
 
   // Get unique tags
   const tags = [...new Set(posts.flatMap((post) => post.data.tags || []))];

@@ -1,8 +1,19 @@
 ---
-import type { CollectionEntry } from "astro:content";
-
 type Props = {
-  entry: CollectionEntry<"blog"> | CollectionEntry<"projects">;
+  entry: {
+    id: string;
+    slug: string;
+    collection?: string;
+    data: {
+      title: string;
+      description: string;
+      date: Date;
+      tags?: string[];
+      draft?: boolean;
+      demoURL?: string;
+      repoURL?: string;
+    };
+  };
 };
 
 const { entry } = Astro.props;

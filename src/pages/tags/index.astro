@@ -1,9 +1,10 @@
 ---
-import { getCollection } from "astro:content";
+import { getPayloadCollection } from "@lib/payload";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 
-const posts = await getCollection("blog", ({ data }) => !data.draft);
+const allPosts = await getPayloadCollection("blog");
+const posts = allPosts.filter((post) => !post.data.draft);
 const tags = [...new Set(posts.flatMap((post) => post.data.tags || []))].sort();
 ---
 

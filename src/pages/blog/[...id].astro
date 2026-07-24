@@ -1,5 +1,5 @@
 ---
-import { type CollectionEntry, getCollection, render } from "astro:content";
+import { getPayloadCollection } from "@lib/payload";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import FormattedDate from "@components/FormattedDate.astro";
@@ -10,36 +10,37 @@ import TableOfContents from "@components/TableOfContents.astro";
 import Giscus from "@components/Giscus.astro";
 
 export async function getStaticPaths() {
-  const posts = (await getCollection("blog"))
+  const posts = (await getPayloadCollection("blog"))
     .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
   return posts.map((post) => ({
     params: { id: post.id },
-    props: post,
+    props: { post },
   }));
 }
-type Props = CollectionEntry<"blog">;
+type Props = { post: any };
 
-const posts = (await getCollection("blog"))
+const { post } = Astro.props;
+const posts = (await getPayloadCollection("blog"))
   .filter((post) => !post.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 function getNextPost() {
   let postIndex;
-  for (const post of posts) {
-    if (post.id === Astro.params.id) {
-      postIndex = posts.indexOf(post);
-      return posts[postIndex + 1];
+  for (const p of posts) {
+    if (p.id === post.id) {
+      postIndex = posts.indexOf(p);
+      return posts[postIndex - 1];
     }
   }
 }
 
 function getPrevPost() {
   let postIndex;
-  for (const post of posts) {
-    if (post.id === Astro.params.id) {
-      postIndex = posts.indexOf(post);
-      return posts[postIndex - 1];
+  for (const p of posts) {
+    if (p.id === post.id) {
+      postIndex = posts.indexOf(p);
+      return posts[postIndex + 1];
     }
   }
 }
@@ -47,8 +48,7 @@ function getPrevPost() {
 const nextPost = getNextPost();
 const prevPost = getPrevPost();
 
-const post = Astro.props;
-const { Content, headings } = await render(post);
+const { Content, headings } = await post.render();
 ---
 
 <Layout title={post.data.title} description={post.data.description}>
@@ -74,7 +74,7 @@ const { Content, headings } = await render(post);
       {
         post.data.tags && post.data.tags?.length > 0 ? (
           <div class="animate flex gap-2 pt-1">
-            {post.data.tags.map((tag) => (
+            {post.data.tags.map((tag: string) => (
               <a
                 href={`/tags/${tag}`}
                 class="rounded-sm border border-black/15 px-2 py-1 text-sm transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"

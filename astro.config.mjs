@@ -5,25 +5,16 @@ import pagefind from "astro-pagefind";
 import tailwindcss from "@tailwindcss/vite";
 import vercel from "@astrojs/vercel";
 import react from "@astrojs/react";
-import keystatic from "@keystatic/astro";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://www.emindev.net/",
-  integrations: [sitemap(), mdx(), pagefind(), react(), keystatic()],
+  integrations: [sitemap(), mdx(), pagefind(), react()],
   adapter: vercel({
     webAnalytics: { enabled: true },
   }),
   vite: {
     plugins: [tailwindcss()],
-    ssr: {
-      noExternal: ['@keystatic/astro'],
-    },
-    define: {
-      'import.meta.env.KEYSTATIC_SECRET': 'process.env.KEYSTATIC_SECRET',
-      'import.meta.env.KEYSTATIC_GITHUB_CLIENT_ID': 'process.env.KEYSTATIC_GITHUB_CLIENT_ID',
-      'import.meta.env.KEYSTATIC_GITHUB_CLIENT_SECRET': 'process.env.KEYSTATIC_GITHUB_CLIENT_SECRET',
-    }
   },
   markdown: {
     shikiConfig: {
