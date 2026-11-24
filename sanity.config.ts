@@ -5,7 +5,7 @@ import { schemaTypes } from "./sanity/schemas";
 
 export default defineConfig({
   name: "default",
-  title: "Astro Micro",
+  title: "EminDev",
   projectId: "3k9hzpz8",
   dataset: "production",
   basePath: "/admin",
