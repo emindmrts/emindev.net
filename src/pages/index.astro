@@ -12,6 +12,21 @@ const projects = await client.fetch(projectsQuery);
 const displayedPosts = blog.slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
 const displayedProjects = projects.slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE.TITLE,
+  url: Astro.site?.toString(),
+  description: HOME.DESCRIPTION,
+  author: {
+    "@type": "Person",
+    name: SITE.TITLE,
+    url: Astro.site?.toString(),
+    email: `mailto:${SITE.EMAIL}`,
+    sameAs: SOCIALS.map((social) => social.HREF),
+  },
+};
+
 const techStack = [
   { name: "TypeScript", icon: "typescript" },
   { name: "JavaScript", icon: "javascript" },
@@ -31,6 +46,7 @@ const techStack = [
 ---
 
 <Layout title={HOME.TITLE} description={HOME.DESCRIPTION}>
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <div class="ambient-glow-left"></div>
   <div class="ambient-glow-right"></div>
   
